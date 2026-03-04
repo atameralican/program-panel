@@ -1,8 +1,9 @@
 
-import { Button } from "@/components/ui/button"
+import { Button, ConfigProvider, Flex } from 'antd';
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import Sitepath from "./site-path"
+import { IconBrandGithub, IconBrandLinkedin } from '@tabler/icons-react';
 
 export function SiteHeader() {
 
@@ -19,18 +20,29 @@ export function SiteHeader() {
         <Sitepath />
         {/* <h1 className="text-base font-medium">Documents</h1> */}
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              GitHub
-            </a>
-          </Button>
+        
+          <Button
+            href="https://github.com/atameralican"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="default"
+            variant="text"
+            icon={<IconBrandGithub />}
+          />
+          <Separator
+          orientation="vertical"
+          className="mx-2 data-[orientation=vertical]:h-4"
+        />
+          <Button
+            href="https://www.linkedin.com/in/alican-atamer/"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="primary"
+            variant="text"
+            icon={<IconBrandLinkedin />}
+          />
         </div>
       </div>
     </header>
-  )
+  );
 }

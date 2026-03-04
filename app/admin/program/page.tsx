@@ -5,8 +5,8 @@
   import {
     Card,
     CardAction,
+    CardContent,
     //CardDescription,
-    //CardContent,
     CardFooter,
     CardHeader,
     //CardTitle,
@@ -121,7 +121,7 @@
             <Input />
           </div></div>
         </CardHeader><hr/>
-        <CardHeader>
+        <CardContent>
   <Table<DataType> dataSource={data}>
           <Column title="" dataIndex="title" key="title" />
           <Column
@@ -155,7 +155,7 @@
             render={(friday: boolean) => <Switch value={friday} />}
           />
         </Table>
-        </CardHeader>
+        </CardContent>
         <hr/>
           <CardFooter className="flex-row justify-end gap-1.5 text-sm ">
             <CardAction className="flex gap-1.5">

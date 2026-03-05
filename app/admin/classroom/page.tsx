@@ -54,37 +54,33 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
     return (
       <div className="flex-row ">
         <Card>
-          <CardHeader className="md:flex flex-row gap-5 items-end">
-            <div>
-              <Typography.Title level={5}>Classroom Name</Typography.Title>
-
-              <Input />
-            </div>
-            <div>
-              <Typography.Title level={5}>Floor</Typography.Title>
-
-              <Input />
-            </div>
-            <div>
-              <Typography.Title level={5}>Projection</Typography.Title>
-
-              <Select value="2">
-                <SelectTrigger className="w-full min-w-100">
-                  <SelectValue placeholder="Projection Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {/* Kayıtlı projectionlar servisten gelecek. */}
-                    <SelectItem value="b1w">Brand1 - White</SelectItem>
-                    <SelectItem value="b2b">Brand2 - Black</SelectItem>
-                    <SelectItem value="b3b">Brand3 - Black</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <CardAction className="flex gap-1.5">
+          <CardHeader className="">
+            <div className="grid  grid-cols-12 gap-4">
+              <div className="col-span-6 lg:col-span-3 ">
+                <Typography.Title level={5}>Classroom Name</Typography.Title>
+                <Input className="w-100" />
+              </div>
+              <div className="col-span-6 lg:col-span-3 ">
+                <Typography.Title level={5}>Floor</Typography.Title>
+                <Input className="w-100" />
+              </div>
+              <div className="col-span-6 lg:col-span-4 ">
+                <Typography.Title level={5}>Projection</Typography.Title>
+                <Select value="2">
+                  <SelectTrigger className="w-full ">
+                    <SelectValue placeholder="Projection Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {/* Kayıtlı projectionlar servisten gelecek. */}
+                      <SelectItem value="b1w">Brand1 - White</SelectItem>
+                      <SelectItem value="b2b">Brand2 - Black</SelectItem>
+                      <SelectItem value="b3b">Brand3 - Black</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-6 lg:col-span-2 content-end   ">
                 <Button
                   size="large"
                   color="blue"
@@ -94,27 +90,20 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
                 <Button
                   size="large"
                   danger
+                  className="ms-2"
                   color="danger"
                   variant="filled"
                   icon={<IconXFilled />}
                 ></Button>
-              </CardAction>
+              </div>
             </div>
           </CardHeader>
 
           <hr />
           <CardContent>
             <Table<DataType> dataSource={data}>
-              <Column
-                title="Name"
-                dataIndex="name"
-                key="name"
-              />
-              <Column
-                title="Floor"
-                dataIndex="floor"
-                key="floor"
-              />
+              <Column title="Name" dataIndex="name" key="name" />
+              <Column title="Floor" dataIndex="floor" key="floor" />
               <Column
                 title="Projection"
                 dataIndex="projection"
@@ -130,11 +119,10 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
                       size="small"
                       color="default"
                       variant="filled"
-                      icon={<IconEdit/>}
+                      icon={<IconEdit />}
                     ></Button>
                     <Button
                       size="small"
-                      
                       color="default"
                       variant="text"
                       icon={<IconTrash />}

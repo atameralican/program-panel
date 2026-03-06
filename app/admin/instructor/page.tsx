@@ -1,10 +1,11 @@
 
 
   "use client"
-  import React from "react";
+  import React, { JSX } from "react";
   import {  Typography, Table, Button ,Switch,Input,InputNumber} from 'antd';
   import { IconXFilled, IconCheckFilled,IconEdit,IconTrash } from "@tabler/icons-react"
   import { ScrollArea } from "@/components/ui/scroll-area"
+  import type { ColumnsType } from 'antd/es/table';
   import {
     Card,
     CardAction,
@@ -17,44 +18,83 @@
   } from "@/components/ui/card"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SortableList from "@/components/dnd-list";
+interface CellData {
+  type: 'busy' | 'assigned';
+  text: string;
+}
 
+interface ScheduleRow {
+  time: string;
+  monday: CellData | null;
+  tuesday: CellData | null;
+  wednesday: CellData | null;
+  thursday: CellData | null;
+  friday: CellData | null;
+}
   const InstructorPage = () => {
-    
-  const { Column } = Table;
-  interface DataType {
-    key: React.Key;
-      name?:string;
-    floor?:string;
-    projectionId?:string;
-    projection?:string;
-  }
-
-  const data: DataType[] = [
-    {
-      key: '1',
-      name:"A06",
-      floor:"0",
-      projection:"Brand1 - White",
-      projectionId:"b1w"
-    },
-    {
-      key: '2',
-      name:"C203",
-      floor:"2",
-      projection:"Brand2 - Black",
-      projectionId:"b2b"
-    },
-    {
-      key: '3',
-      name:"B105",
-      floor:"1",
-      projection:"Brand3 - Black",
-      projectionId:"b3b"
-    },
-    
-    
-    
+   const dummy: ScheduleRow[] = [
+    { time: '09:00 - 09:50', monday: null, tuesday: { type: 'busy', text: 'Ali Veli' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: null, friday: null },
+    { time: '10:00 - 10:50', monday: null, tuesday: { type: 'busy', text: 'Ali Veli' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: null, friday: null },
+    { time: '11:00 - 11:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'busy', text: 'Ali Veli' }, thursday: null, friday: null },
+    { time: '12:00 - 12:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Assignment to' } },
+    { time: '13:00 - 13:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Assignment to' } },
+    { time: '14:00 - 14:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Assignment to' } },
+    { time: '15:00 - 15:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Ayşe Fatma' } },
+    { time: '16:00 - 16:50', monday: null, tuesday: null, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: null, friday: { type: 'assigned', text: 'Ayşe Fatma' } },
   ];
+
+  const columns: ColumnsType<ScheduleRow> = [
+    {
+      title: '',
+      dataIndex: 'time',
+      key: 'time',
+      width: 150,
+      fixed: 'left',
+    },
+    {
+      title: 'Monday',
+      dataIndex: 'monday',
+      key: 'monday',
+      render: (cell: CellData | null) => renderCell(cell),
+    },
+    {
+      title: 'Tuesday',
+      dataIndex: 'tuesday',
+      key: 'tuesday',
+      render: (cell: CellData | null) => renderCell(cell),
+    },
+    {
+      title: 'Wednesday',
+      dataIndex: 'wednesday',
+      key: 'wednesday',
+      render: (cell: CellData | null) => renderCell(cell),
+    },
+    {
+      title: 'Thursday',
+      dataIndex: 'thursday',
+      key: 'thursday',
+      render: (cell: CellData | null) => renderCell(cell),
+    },
+    {
+      title: 'Friday',
+      dataIndex: 'friday',
+      key: 'friday',
+      render: (cell: CellData | null) => renderCell(cell),
+    },
+  ];
+
+  const renderCell = (cell: CellData | null): JSX.Element | null => {
+    if (!cell) return null;
+    
+    const className = cell.type === 'busy' ? 'cell-busy' : 'cell-assigned';
+    
+    return (
+      <div className={className}>
+        {cell.text}
+      </div>
+    );
+  };
+  
     return (
       <div className="flex-row ">
         <Card>
@@ -105,36 +145,13 @@ import SortableList from "@/components/dnd-list";
 
           <hr />
           <CardContent>
-            <Table<DataType> dataSource={data}>
-              <Column title="Name" dataIndex="name" key="name" />
-              <Column title="Floor" dataIndex="floor" key="floor" />
-              <Column
-                title="Projection"
-                dataIndex="projection"
-                key="projection"
-              />
-              <Column
-                title="Actions"
-                dataIndex="wednesday"
-                key="wednesday"
-                render={() => (
-                  <div className="flex gap-2">
-                    <Button
-                      size="small"
-                      color="default"
-                      variant="filled"
-                      icon={<IconEdit />}
-                    ></Button>
-                    <Button
-                      size="small"
-                      color="default"
-                      variant="text"
-                      icon={<IconTrash />}
-                    ></Button>
-                  </div>
-                )}
-              />
-            </Table>
+             <Table
+        columns={columns}
+        dataSource={dummy}
+        pagination={false}
+        bordered
+        rowKey="time"
+      />
           </CardContent>
         </Card>
       </div>

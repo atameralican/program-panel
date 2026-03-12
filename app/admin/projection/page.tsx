@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, Table, Button, Switch, Input, InputNumber } from "antd";
 import {
   IconXFilled,
@@ -26,39 +26,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ProjectionPage = () => {
-  const { Column } = Table;
-  interface DataType {
-    key: React.Key;
+ interface DataType {
+    id: React.Key;
     brand?: string;
     serino?: string;
     color?: string;
     active?: boolean;
   }
+  
+const ProjectionPage = () => {
+   const [projectionList, setProjectionList] = useState<DataType[]>([]);
+  const { Column } = Table;
+        useEffect(() => {
+    fetch("/api/projection", {})
+      .then((res) => res.json())
+      .then((res) => {
+        setProjectionList(res || []);
+       // setGameList(res || []);
+       console.log("res",res)
+       // setFilteredGameList(res || []);
+      })
+      .catch((err) => console.error("Error fetching game list:", err));
+  }, []);
+ 
 
-  const data: DataType[] = [
-    {
-      key: "1",
-      brand: "Brand 1",
-      serino: "Seri No 1",
-      color: "White",
-      active: true,
-    },
-    {
-      key: "2",
-      brand: "Brand 2",
-      serino: "Seri No 2",
-      color: "Black",
-      active: false,
-    },
-    {
-      key: "3",
-      brand: "Brand 3",
-      serino: "Seri No 3",
-      color: "Black",
-      active: true,
-    },
-  ];
   return (
     <div className="flex-row ">
       <Card>
@@ -109,7 +100,7 @@ const ProjectionPage = () => {
 
         <hr />
         <CardContent>
-          <Table<DataType> dataSource={data}>
+          <Table<DataType> rowKey="id" dataSource={projectionList}  >
             <Column title="Brand" dataIndex="brand" key="brand" />
             <Column title="Seri No" dataIndex="serino" key="serino" />
             <Column title="Color" dataIndex="color" key="color" />

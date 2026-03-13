@@ -43,7 +43,6 @@ const ProjectionPage = () => {
       .then((res) => {
         setProjectionList(res || []);
        // setGameList(res || []);
-       console.log("res",res)
        // setFilteredGameList(res || []);
       })
       .catch((err) => console.error("Error fetching game list:", err));

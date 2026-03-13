@@ -1,11 +1,8 @@
 "use client"
 
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
-  IconUserCircle,
 } from "@tabler/icons-react"
 
 import {
@@ -16,10 +13,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -28,6 +22,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { signOutAction } from "./log-out"
+import { Modal,  } from "antd"
+import { useState } from "react"
 
 export function NavUser({
   user,
@@ -39,7 +36,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-
+  const [logOutModalVisible, setLogOutModalVisible] = useState(false);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -51,12 +48,12 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">BU</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.email}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
+                  {user.name}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -68,11 +65,11 @@ export function NavUser({
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
+            {/* <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">BU</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -81,9 +78,9 @@ export function NavUser({
                   </span>
                 </div>
               </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            </DropdownMenuLabel> */}
+            {/* <DropdownMenuSeparator /> */}
+            {/* <DropdownMenuGroup>
               <DropdownMenuItem>
                 <IconUserCircle />
                 Account
@@ -96,15 +93,25 @@ export function NavUser({
                 <IconNotification />
                 Notifications
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout />
-              Log out
-            </DropdownMenuItem>
+            </DropdownMenuGroup> */}
+            {/* <DropdownMenuSeparator /> */}
+        
+              <DropdownMenuItem onClick={()=>setLogOutModalVisible(true)}>
+                <IconLogout />
+                Log out
+              </DropdownMenuItem>
+           
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      {logOutModalVisible&&<Modal
+        title="Are you sure you want to log out?"
+        open={logOutModalVisible}
+        onOk={()=>{signOutAction();setLogOutModalVisible(false)}}
+        onCancel={()=>setLogOutModalVisible(false)}
+      >
+        <p>You will be signed out of your account.</p>
+      </Modal>}
     </SidebarMenu>
-  )
+  );
 }

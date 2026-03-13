@@ -31,7 +31,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  user?: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+};
 const data = {
   user: {
     //Buraya daha sonra giriş yapan kullanıcının bilgileri gelecek
@@ -83,7 +89,8 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -106,7 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user??data.user} />
       </SidebarFooter>
     </Sidebar>
   )

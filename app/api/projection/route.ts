@@ -2,22 +2,19 @@
 
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
-
+//GET
 export async function GET(req: Request) {
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase
     .from('projections')
     .select(`*`)
-
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
   return NextResponse.json(data || null)
 }
 
-
-
+//INSERT
 export async function POST(req: Request) {
   const supabase = await createSupabaseServerClient()
   // const body = await req.json()
@@ -27,14 +24,13 @@ export async function POST(req: Request) {
     .insert(body) // Body içinde tablo sütunlarına uygun veri gelmeli
     .select()//kaydedileni dönmesi için
     .single()//tek veri kaydedildiğinden dolayı array içinde değil tek object olarak gönderir. 
-
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
   return NextResponse.json(data, { status: 201 })
 }
 
+//DELETE
 export async function DELETE(req: Request) {
   const supabase = await createSupabaseServerClient()
   // const body = await req.json()
@@ -44,14 +40,13 @@ export async function DELETE(req: Request) {
     .from('projections')
     .delete()
     .eq("id", id)// sadece id göndermek yeterli 
-
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
   return NextResponse.json(data, { status: 201 })
 }
 
+//UPDATE 
 export async function PUT(req: Request) {
   const supabase = await createSupabaseServerClient()
   const body = await req.json()
@@ -61,11 +56,9 @@ export async function PUT(req: Request) {
     .update(updateData)
     .eq("id", id)
     .select()
-
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
   return NextResponse.json(data, { status: 201 })
 }
 

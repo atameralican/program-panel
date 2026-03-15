@@ -22,19 +22,18 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { useNotify } from "@/components/ui/notify-ant-rev";
+import { DeleteDataType } from "@/lib/types";
 
 interface ProjectionDataType {
   id: React.Key | null;
   brand?: string;
   serino?: string;
+  info?:string;
   color?: string;
   active?: boolean;
 }
 
-type DeleteDataType = {
-  id: React.Key | null;
-  visible: boolean;
-};
+
 const ProjectionPage = () => {
   const { Column } = Table;
   const notify = useNotify();
@@ -51,6 +50,7 @@ const ProjectionPage = () => {
     active: true,
     id: null,
     serino: "",
+    info: "",
     color: "",
   });
   const getProjectionList = () => {
@@ -75,6 +75,7 @@ const ProjectionPage = () => {
       brand: "",
       id: null,
       serino: "",
+      info: "",
       color: "",
       active: true,
     });
@@ -236,6 +237,19 @@ const ProjectionPage = () => {
               />
             </div>
             <div className="col-span-6 lg:col-span-3">
+              <Typography.Title level={5}>Info</Typography.Title>
+              <Input
+                className="w-100"
+                value={selectedData?.info}
+                onChange={(e) => {
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    info: e?.target?.value,
+                  }));
+                }}
+              />
+            </div>
+            <div className="col-span-4 lg:col-span-2">
               <Typography.Title level={5}>Serial No</Typography.Title>
               <Input
                 className="w-100"
@@ -248,7 +262,7 @@ const ProjectionPage = () => {
                 }}
               />
             </div>
-            <div className="col-span-6 lg:col-span-3">
+            <div className="col-span-4 lg:col-span-2">
               <Typography.Title level={5}>Color</Typography.Title>
               <Select
                 className="w-full"
@@ -267,7 +281,7 @@ const ProjectionPage = () => {
                 ]}
               />
             </div>
-            <div className="col-span-6 lg:col-span-3 content-end ">
+            <div className="col-span-4 lg:col-span-2 content-end ">
               <Button
                 size="large"
                 color="blue"
@@ -284,7 +298,7 @@ const ProjectionPage = () => {
                 icon={
                   selectedData.id ? <IconPencilCheck /> : <IconCheckFilled />
                 }
-              ></Button>
+              />
               <Button
                 size="large"
                 danger
@@ -304,24 +318,13 @@ const ProjectionPage = () => {
             <Column title="Brand" dataIndex="brand" key="brand" />
             <Column title="Serial No" dataIndex="serino" key="serino" />
             <Column title="Color" dataIndex="color" key="color" />
-            <Column
-              title="Active"
-              dataIndex="active"
-              key="active"
-              render={(_, record: ProjectionDataType) => (
-                <Switch
-                  checked={record?.active}
-                  onChange={() => {
-                    changeActive({ element: record });
-                  }}
-                />
-              )}
-            />
+            <Column title="Info" dataIndex="info" key="info" />
             <Column
               title="Actions"
               key="actions"
               render={(_, record: ProjectionDataType) => (
                 <div className="flex gap-2">
+                 
                   <Button
                     size="small"
                     color="default"
@@ -329,6 +332,7 @@ const ProjectionPage = () => {
                       setSelectedData({
                         brand: record.brand,
                         id: record.id,
+                        info:record.info,
                         active: record.active,
                         serino: record?.serino ?? "",
                         color: record?.color ?? "",
@@ -346,6 +350,12 @@ const ProjectionPage = () => {
                     variant="text"
                     icon={<IconTrash />}
                   ></Button>
+                    <Switch
+                  checked={record?.active}
+                  onChange={() => {
+                    changeActive({ element: record });
+                  }}
+                />
                 </div>
               )}
             />
@@ -358,7 +368,7 @@ const ProjectionPage = () => {
           open={deleteModalVisible.visible}
           okText="Yes"
           onOk={() => {
-            handleDelete(deleteModalVisible.id);
+            handleDelete(deleteModalVisible.id!);
             setDeleteModalVisible({ id: null, visible: false });
           }}
           onCancel={() => setDeleteModalVisible({ id: null, visible: false })}

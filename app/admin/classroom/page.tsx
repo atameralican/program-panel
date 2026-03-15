@@ -6,39 +6,34 @@ import {
   Typography,
   Table,
   Button,
-  Switch,
   Input,
-  InputNumber,
   Select,
+  Modal,
 } from "antd";
 import {
   IconXFilled,
   IconCheckFilled,
   IconEdit,
   IconTrash,
+  IconPencilCheck,
 } from "@tabler/icons-react";
 import {
   Card,
-  CardAction,
   CardContent,
-  //CardDescription,
-  //CardContent,
-  CardFooter,
   CardHeader,
-  //CardTitle,
 } from "@/components/ui/card";
-// import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNotify } from "@/components/ui/notify-ant-rev";
+import { DeleteDataType } from "@/lib/types";
 interface ClassroomDataType {
-  id?: React.Key|null;
+  id: React.Key | null;
   name?: string;
   floor?: string;
-  projection?: string;
-  projection_id?: number|string|null;
-  projections?: ProjectionDataType;
+  projection_id?: number | string | null;
 }
 interface ProjectionDataType {
   id: React.Key;
   brand?: string;
+  info?: string;
   serino?: string;
   color?: string;
   active?: boolean;
@@ -47,66 +42,53 @@ const ClassRoomPage = () => {
   const [projectionList, setProjectionList] = useState<ProjectionDataType[]>(
     [],
   );
+  const [deleteModalVisible, setDeleteModalVisible] = useState<DeleteDataType>({
+    id: null,
+    visible: false,
+  });
   const [classroomList, setClassroomList] = useState<ClassroomDataType[]>([]);
-const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType | null>({id:null,name:"",floor:"",projection_id:null});
-  
-  const { Column } = Table;
+  const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType>({
+    id: null,
+    name: "",
+    floor: "",
+    projection_id: null,
+  });
 
-  // const data: ClassroomDataType[] = [
-  //   {
-  //     id: '1',
-  //     name:"A06",
-  //     floor:"0",
-  //     projection:"Brand1 - White",
-  //     projectionId:"b1w"
-  //   },
-  //   {
-  //     id: '2',
-  //     name:"C203",
-  //     floor:"2",
-  //     projection:"Brand2 - Black",
-  //     projectionId:"b2b"
-  //   },
-  //   {
-  //     id: '3',
-  //     name:"B105",
-  //     floor:"1",
-  //     projection:"Brand3 - Black",
-  //     projectionId:"b3b"
-  //   },
-  // ];
+  const [loadingButton, setLoadingButton] = useState(false);
+  const { Column } = Table;
+  const notify = useNotify();
+
+  //GET
   const getProjectionList = () => {
     fetch("/api/projection/brands")
       .then((res) => res.json())
       .then((res) => {
-        const options = (res || []).map((item: any) => ({
-          label: `${item.brand ?? ""} - ${item.color ?? ""} - ${item.serino ?? ""}`,
-          id: item.id,
-          brand: item.brand,
-          color: item.color,
-          projections: item.projections,
+        const options = (res || []).map((item: ProjectionDataType) => ({
+          ...item,
+          label: `${item.brand ?? ""} - ${item.color ?? ""} - ${item.info ?? ""} - ${item.serino ?? ""}`,
         }));
 
         setProjectionList(options);
       })
       .catch((err) => console.error("Error fetching projection list:", err));
   };
+
   const getClassroomList = () => {
     fetch("/api/classroom")
       .then((res) => res.json())
       .then((res) => {
-        console.log(res);
         const options = (res || []).map((item: any) => ({
-          name: item.name,
-          floor: item.floor,
-          projection:
-            item.projections?.brand +
-              " - " +
-              item.projections?.color +
-              " - " +
-              item.projections?.serino || "",
+          ...item,
+          projection: item.projections?.id
+            ? item.projections?.brand +
+                " - " +
+                item.projections?.color +
+                " - " +
+                item.projections?.info +
+                " - " +
+                item.projections?.serino || ""
+            : "",
         }));
-
         setClassroomList(options);
       })
       .catch((err) => console.error("Error fetching projection list:", err));
@@ -115,6 +97,90 @@ const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType | nul
     getProjectionList();
     getClassroomList();
   }, []);
+
+  //ADD & UPDATE
+  const handleSave = () => {
+    if (classroomPayload?.name) {
+      fetch("/api/classroom", {
+        method: classroomPayload?.id ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...classroomPayload }),
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.error) {
+            setLoadingButton(false);
+            return notify.error({
+              title: "Fail",
+              description: res.error,
+            });
+          } else {
+            notify.success({ title: "Success", description: "Saved" });
+            handleClear();
+            getClassroomList();
+            setLoadingButton(false);
+          }
+        })
+        .catch((err) => {
+          setLoadingButton(false);
+          return notify.error({
+            title: "Fail",
+            description: err.message ?? err,
+          });
+        });
+    } else {
+      setLoadingButton(false);
+      return notify.error({
+        title: "Fail",
+        description: "Name not null",
+      });
+    }
+  };
+
+  //DELETE
+  const handleDelete = (id: React.Key | null) => {
+    fetch("/api/classroom", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.error) {
+          return notify.error({
+            title: "Fail",
+            description: data.error,
+          });
+        }
+
+        notify.success({
+          title: "Success",
+          description: "Deleted",
+        });
+
+        getClassroomList();
+      })
+      .catch((err) => {
+        notify.error({
+          title: "Fail",
+          description: err.message ?? err,
+        });
+      });
+  };
+  //CLEAR
+  const handleClear = () => {
+    setClassroomPayload({
+      id: null,
+      name: "",
+      floor: "",
+      projection_id: null,
+    });
+  };
+
   return (
     <div className="flex-row ">
       <Card>
@@ -150,17 +216,14 @@ const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType | nul
               <Typography.Title level={5}>Projection</Typography.Title>
 
               <Select
-                // defaultValue="lucy"
                 onSelect={(e) => {
                   setClassroomPayload((prev) => ({
                     ...prev,
-                    projectionId: e,
+                    projection_id: e,
                   }));
                 }}
                 value={classroomPayload?.projection_id}
                 className="w-full"
-                // onSelect={(e) => console.log(e)}
-                // onChange={()=>}
                 fieldNames={{ label: "label", value: "id" }}
                 loading={projectionList.length === 0}
                 options={projectionList}
@@ -170,14 +233,26 @@ const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType | nul
               <Button
                 size="large"
                 color="blue"
+                loading={loadingButton}
                 variant="filled"
-                icon={<IconCheckFilled />}
-              ></Button>
+                onClick={() => {
+                  setLoadingButton(true);
+                  handleSave();
+                }}
+                icon={
+                  classroomPayload?.id ? (
+                    <IconPencilCheck />
+                  ) : (
+                    <IconCheckFilled />
+                  )
+                }
+              />
               <Button
                 size="large"
                 danger
                 className="ms-2"
                 color="danger"
+                onClick={() => handleClear()}
                 variant="filled"
                 icon={<IconXFilled />}
               ></Button>
@@ -197,28 +272,58 @@ const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType | nul
             />
             <Column
               title="Actions"
-              dataIndex="wednesday"
-              key="wednesday"
-              render={() => (
+              key="actions"
+              render={(_, record: ClassroomDataType) => (
                 <div className="flex gap-2">
                   <Button
                     size="small"
                     color="default"
+                    onClick={() =>
+                      setClassroomPayload({
+                        id: record.id,
+                        name: record?.name,
+                        floor: record?.floor,
+                        projection_id: record?.projection_id,
+                      })
+                    }
                     variant="filled"
                     icon={<IconEdit />}
                   ></Button>
                   <Button
                     size="small"
                     color="default"
+                    onClick={() =>
+                      setDeleteModalVisible({
+                        id: record.id ?? null,
+                        visible: true,
+                      })
+                    }
                     variant="text"
                     icon={<IconTrash />}
-                  ></Button>
+                  />
                 </div>
               )}
             />
           </Table>
         </CardContent>
       </Card>
+      {deleteModalVisible.visible && (
+        <Modal
+          title="Delete Confirmation"
+          open={deleteModalVisible.visible}
+          okText="Yes"
+          onOk={() => {
+            handleDelete(deleteModalVisible.id!);
+            setDeleteModalVisible({ id: null, visible: false });
+          }}
+          onCancel={() => setDeleteModalVisible({ id: null, visible: false })}
+        >
+          <p>Are you sure you want to delete this entry?</p>
+          <p style={{ color: "gray", fontSize: "12px" }}>
+            This action is permanent and cannot be undone.
+          </p>
+        </Modal>
+      )}
     </div>
   );
 };

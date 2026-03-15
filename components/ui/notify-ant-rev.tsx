@@ -40,7 +40,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         title: opts.title,
         description: opts.description,
         placement: opts.placement ?? "topRight",
-        duration: opts.duration ?? 3,
+        duration: opts.duration ?? 5,
       }),
     info: (opts: NotifyOptions) =>
       api.info({

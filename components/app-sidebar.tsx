@@ -3,21 +3,15 @@
 import * as React from "react"
 import Link from "next/link" 
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
+  IconLayoutDashboard,   
+  IconBooks,             
+  IconBlocks,            
+  IconDeviceProjector,   
+  IconSchool,            
+  IconUserCheck,         
+  IconColumns,           
+  IconPresentation,      
   IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -49,42 +43,42 @@ const data = {
     {
       title: "Admin",
       url: "/admin",
-      icon: IconDashboard,
+      icon: IconLayoutDashboard,
     },
     {
       title: "Program Add",
       url: "/admin/program",
-      icon: IconListDetails,
+      icon: IconBooks,
     },
     {
       title: "Modul Add",
       url: "/admin/modul",
-      icon: IconChartBar,
+      icon: IconBlocks,
     },
     {
       title: "Projection Add",
       url: "/admin/projection",
-      icon: IconFolder,
+      icon: IconDeviceProjector,
     },
     {
       title: "Classroom Add",
       url: "/admin/classroom",
-      icon: IconUsers,
+      icon: IconSchool,
     },
     {
       title: "Teacher Add",
       url: "/admin/teacher",
-      icon: IconUsers,
+      icon: IconUserCheck,
     },
     {
       title: "Section Add",
       url: "/admin/section",
-      icon: IconUsers,
+      icon: IconColumns,
     },
     {
       title: "Instructor Add",
       url: "/admin/instructor",
-      icon: IconUsers,
+      icon: IconPresentation,
     },
   ],
 }

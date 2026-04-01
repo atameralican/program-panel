@@ -51,8 +51,8 @@ const data = {
       icon: IconBooks,
     },
     {
-      title: "Modul Add",
-      url: "/admin/modul",
+      title: "Module Add",
+      url: "/admin/module",
       icon: IconBlocks,
     },
     {
@@ -71,8 +71,8 @@ const data = {
       icon: IconUserCheck,
     },
     {
-      title: "Section Add",
-      url: "/admin/section",
+      title: "Class Code Add",
+      url: "/admin/class-code",
       icon: IconColumns,
     },
     {

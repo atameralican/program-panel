@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { Typography, Table, Button, Switch, Input, InputNumber } from "antd";
+import React, { useEffect, useState } from "react";
+import { Typography, Table, Button, Switch,Select, Input, InputNumber } from "antd";
 import {
   IconXFilled,
   IconCheckFilled,
@@ -17,17 +17,12 @@ import {
   CardHeader,
   //CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ProgramProps } from "../program/page";
+
 
 const ModulPage = () => {
   const { Column } = Table;
+  const [programList, setProgramList] = useState<ProgramProps[]>();
   interface DataType {
     key: React.Key;
     modulName?: string;
@@ -59,6 +54,18 @@ const ModulPage = () => {
       programName: "Program 3",
     },
   ];
+
+
+    const getProgramList = () => {
+      fetch("/api/program", {})
+        .then((res) => res?.json())
+        .then((res) => {
+          setProgramList(res || []);
+        })
+    };
+    useEffect(() => {
+      getProgramList();
+    }, []);
   return (
     <div className="flex-row ">
       <Card>
@@ -66,43 +73,35 @@ const ModulPage = () => {
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Modul Name</Typography.Title>
-              <Input className="w-100" />
+              <Input className="w-full" />
             </div>
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Code</Typography.Title>
-              <Input className="w-100" />
+              <Input className="w-full" />
             </div>
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Program</Typography.Title>
-              <Select value="2">
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Program Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {/* servisten gelen programlar valueda id si content kısmında ise adı yazacak.*/}
-                    <SelectItem value="1">Program 1</SelectItem>
-                    <SelectItem value="2">Program 2</SelectItem>
-                    <SelectItem value="3">Program 3</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <Select
+                fieldNames={{ label: "name", value: "id" }}
+                className="w-full"
+                options={programList}
+              />
             </div>
             <div className="col-span-6 lg:col-span-3 content-end ">
-                <Button
-                  size="large"
-                  color="blue"
-                  variant="filled"
-                  icon={<IconCheckFilled />}
-                ></Button>
-                <Button
-                  size="large"
-                  danger
-                  className="ms-2"
-                  color="danger"
-                  variant="filled"
-                  icon={<IconXFilled />}
-                ></Button>
+              <Button
+                size="large"
+                color="blue"
+                variant="filled"
+                icon={<IconCheckFilled />}
+              ></Button>
+              <Button
+                size="large"
+                danger
+                className="ms-2"
+                color="danger"
+                variant="filled"
+                icon={<IconXFilled />}
+              ></Button>
             </div>
           </div>
         </CardHeader>

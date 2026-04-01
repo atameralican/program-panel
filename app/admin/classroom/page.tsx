@@ -189,7 +189,7 @@ const ClassRoomPage = () => {
             <div className="col-span-6 lg:col-span-3 ">
               <Typography.Title level={5}>Classroom Name</Typography.Title>
               <Input
-                className="w-100"
+                className="w-full"
                 value={classroomPayload?.name}
                 onChange={(e) => {
                   setClassroomPayload((prev) => ({
@@ -202,7 +202,7 @@ const ClassRoomPage = () => {
             <div className="col-span-6 lg:col-span-3 ">
               <Typography.Title level={5}>Floor</Typography.Title>
               <Input
-                className="w-100"
+                className="w-full"
                 value={classroomPayload?.floor}
                 onChange={(e) => {
                   setClassroomPayload((prev) => ({

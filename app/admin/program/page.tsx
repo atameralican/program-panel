@@ -12,9 +12,8 @@ import {
 import WeeklySchedulePicker from "@/components/WeeklySchedulePicker";
 import { useNotify } from "@/components/ui/notify-ant-rev";
 
-type ProgramProps = {
+export type ProgramProps = {
   name: string;
-  code: string;
   max_limit: number;
   timeSlots: number[];
 };
@@ -22,13 +21,12 @@ const ProgramPage = () => {
   const notify = useNotify();
   const [selectedData, setSelectedData] = useState<ProgramProps>({
     name: "",
-    code: "",
     max_limit: 23,
     timeSlots: [],
   });
 
   const clearForm = () => {
-    setSelectedData((prev) => ({ ...prev, name: "", code: "", timeSlots: [] }));
+    setSelectedData((prev) => ({ ...prev, name: "", timeSlots: [] }));
   };
 
   //seçilen slotlar değişimi
@@ -52,10 +50,10 @@ const ProgramPage = () => {
       });
       return;
     }
-    if (!selectedData.name.trim() || !selectedData.code.trim()) {
+    if (!selectedData.name.trim() ) {
       notify.error({
         title: "Fail",
-        description: `Lütfen program adı ve kodunu girin!`,
+        description: `Lütfen program adnı girin!`,
       });
       return;
     }
@@ -107,7 +105,7 @@ const ProgramPage = () => {
             <div className="col-span-12 md:col-span-4">
               <Typography.Title level={5}>Program Name</Typography.Title>
               <Input
-                className="w-100"
+                className="w-full"
                 value={selectedData?.name}
                 onChange={(e) =>
                   setSelectedData((prev) => ({ ...prev, name: e.target.value }))
@@ -115,21 +113,11 @@ const ProgramPage = () => {
               />
             </div>
 
-            <div className="col-span-8 md:col-span-4">
-              <Typography.Title level={5}>Program Code</Typography.Title>
-              <Input
-                className="w-100"
-                value={selectedData?.code}
-                onChange={(e) =>
-                  setSelectedData((prev) => ({ ...prev, code: e.target.value }))
-                }
-              />
-            </div>
 
             <div className="col-span-4 md:col-span-4">
               <Typography.Title level={5}> Limit</Typography.Title>
               <InputNumber
-                className="w-100"
+                className="w-full"
                 min={1}
                 max={40}
                 value={selectedData?.max_limit}

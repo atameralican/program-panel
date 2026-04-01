@@ -226,7 +226,7 @@ const ProjectionPage = () => {
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Brand</Typography.Title>
               <Input
-                className="w-100"
+                className="w-full"
                 value={selectedData?.brand}
                 onChange={(e) => {
                   setSelectedData((prev) => ({
@@ -239,7 +239,7 @@ const ProjectionPage = () => {
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Info</Typography.Title>
               <Input
-                className="w-100"
+                className="w-full"
                 value={selectedData?.info}
                 onChange={(e) => {
                   setSelectedData((prev) => ({
@@ -252,7 +252,7 @@ const ProjectionPage = () => {
             <div className="col-span-4 lg:col-span-2">
               <Typography.Title level={5}>Serial No</Typography.Title>
               <Input
-                className="w-100"
+                className="w-full"
                 value={selectedData?.serino}
                 onChange={(e) => {
                   setSelectedData((prev) => ({

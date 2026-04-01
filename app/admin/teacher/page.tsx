@@ -69,7 +69,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
             <div className="grid grid-cols-12  gap-5">
               <div className="col-span-12 md:col-span-6 lg:col-span-3 ">
                 <Typography.Title level={5}>Name</Typography.Title>
-                <Input className="w-100" />
+                <Input className="w-full" />
               </div>
 
               <div className="col-span-12 md:col-span-6 lg:col-span-2">
@@ -90,17 +90,17 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
               <div className="col-span-12 md:col-span-6 lg:col-span-2">
                 <Typography.Title level={5}>Room</Typography.Title>
-                <Input className="w-100" />
+                <Input className="w-full" />
               </div>
 
               <div className="col-span-12 md:col-span-6 lg:col-span-2">
                 <Typography.Title level={5}>Phone Number</Typography.Title>
-                <Input className="w-100" />
+                <Input className="w-full" />
               </div>
 
               <div className="col-span-12 md:col-span-6 lg:col-span-2">
                 <Typography.Title level={5}>Room Tel</Typography.Title>
-                <Input className="w-100" />
+                <Input className="w-full" />
               </div>
 
               <div className="col-span-12 md:col-span-6 lg:col-span-3">
@@ -123,12 +123,12 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
               <div className="col-span-12 md:col-span-6 lg:col-span-2">
  <Typography.Title level={5}>Section Limit</Typography.Title>
-                <Input className="w-100" />
+                <Input className="w-full" />
               </div>
 
               <div className="col-span-12 md:col-span-6 lg:col-span-2">
  <Typography.Title level={5}>Full Limit</Typography.Title>
-                <Input className="w-100" />
+                <Input className="w-full" />
               </div>
 
               <div className="col-span-12 md:col-span-6 lg:col-span-3">

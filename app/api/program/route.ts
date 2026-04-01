@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Seçilen saat sayısı geçersiz!" }, { status: 400 })
     }
 
-    if (!body.name || !body.code || !body?.max_limit || body.max_limit < 1) {
+    if (!body.name || !body?.max_limit || body.max_limit < 1) {
         return NextResponse.json({ error: "Gerekli alanlar eksik!" }, { status: 400 })
     }
     
@@ -46,3 +46,17 @@ export async function POST(req: Request) {
 /**
  * İlk başta programı kaydediyoruz program kaydedilip hata vermez ise oluşan id ile time slotları kaydediyoruz. 
  */
+
+
+
+//GET
+export async function GET(req: Request) {
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .from('programs')
+    .select(`*`)
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+  return NextResponse.json(data || null)
+}

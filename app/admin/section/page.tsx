@@ -70,7 +70,7 @@ const SectionPage = () => {
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Section Name</Typography.Title>
-              <Input className="w-100" />
+              <Input className="w-full" />
             </div>
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Modul</Typography.Title>

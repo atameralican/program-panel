@@ -2,14 +2,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 
-import {
-  Typography,
-  Table,
-  Button,
-  Input,
-  Select,
-  Modal,
-} from "antd";
+import { Typography, Table, Button, Input, Select, Modal } from "antd";
 import {
   IconXFilled,
   IconCheckFilled,
@@ -17,130 +10,96 @@ import {
   IconTrash,
   IconPencilCheck,
 } from "@tabler/icons-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useNotify } from "@/components/ui/notify-ant-rev";
 import { DeleteDataType } from "@/lib/types";
 interface ClassroomDataType {
-  id: React.Key | null;
-  name?: string;
+  id: number | null;
+  name: string;
   floor?: string;
-  projection_id?: number | string | null;
-}
-interface ProjectionDataType {
-  id: React.Key;
-  brand?: string;
+  projection?: string;
   info?: string;
-  serino?: string;
-  color?: string;
-  active?: boolean;
 }
+
 const ClassRoomPage = () => {
-  const [projectionList, setProjectionList] = useState<ProjectionDataType[]>(
-    [],
-  );
-  const [deleteModalVisible, setDeleteModalVisible] = useState<DeleteDataType>({
-    id: null,
-    visible: false,
-  });
-  const [classroomList, setClassroomList] = useState<ClassroomDataType[]>([]);
+  const [classRoomList, setClassRoomList] = useState<ClassroomDataType[]>([]);
   const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType>({
     id: null,
     name: "",
     floor: "",
-    projection_id: null,
+    projection: "",
+    info: "",
   });
-
-  const [loadingButton, setLoadingButton] = useState(false);
   const { Column } = Table;
   const notify = useNotify();
 
-  //GET
-  const getProjectionList = () => {
-    fetch("/api/projection/brands")
-      .then((res) => res.json())
-      .then((res) => {
-        const options = (res || []).map((item: ProjectionDataType) => ({
-          ...item,
-          label: `${item.brand ?? ""} - ${item.color ?? ""} - ${item.info ?? ""} - ${item.serino ?? ""}`,
-        }));
-
-        setProjectionList(options);
-      })
-      .catch((err) => console.error("Error fetching projection list:", err));
-  };
-
-  const getClassroomList = () => {
-    fetch("/api/classroom")
-      .then((res) => res.json())
-      .then((res) => {
-        const options = (res || []).map((item: any) => ({
-          ...item,
-          projection: item.projections?.id
-            ? item.projections?.brand +
-                " - " +
-                item.projections?.color +
-                " - " +
-                item.projections?.info +
-                " - " +
-                item.projections?.serino || ""
-            : "",
-        }));
-        setClassroomList(options);
-      })
-      .catch((err) => console.error("Error fetching projection list:", err));
-  };
   useEffect(() => {
-    getProjectionList();
     getClassroomList();
   }, []);
 
-  //ADD & UPDATE
-  const handleSave = () => {
-    if (classroomPayload?.name) {
-      fetch("/api/classroom", {
-        method: classroomPayload?.id ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...classroomPayload }),
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          if (res.error) {
-            setLoadingButton(false);
-            return notify.error({
-              title: "Fail",
-              description: res.error,
-            });
-          } else {
-            notify.success({ title: "Success", description: "Saved" });
-            handleClear();
-            getClassroomList();
-            setLoadingButton(false);
-          }
-        })
-        .catch((err) => {
-          setLoadingButton(false);
-          return notify.error({
-            title: "Fail",
-            description: err.message ?? err,
-          });
-        });
-    } else {
-      setLoadingButton(false);
-      return notify.error({
-        title: "Fail",
-        description: "Name not null",
-      });
-    }
+  //CLEAR
+  const handleClear = () => {
+    setClassroomPayload({
+      id: null,
+      name: "",
+      floor: "",
+      projection: "",
+      info: "",
+    });
   };
 
+  ///////// CRUD İŞLEMLERİ ////////
+  //GET
+  const getClassroomList = () => {
+    fetch("/api/classroom", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setClassRoomList(res || []);
+      });
+  };
+  //ADD & UPDATE
+  const handleSave = () => {
+    //validasyonlar
+    if (classroomPayload.name.trim() === "") {
+      notify.error({
+        title: "Fail",
+        description: "Classroom Adı Boş Olamaz!",
+      });
+      return;
+    }
+
+    //Save Action
+    fetch("/api/classroom", {
+      method: classroomPayload.id ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...classroomPayload }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.error) {
+          return notify.error({
+            title: "Fail",
+            description: res.error,
+          });
+        }
+        notify.success({
+          title: "Success",
+          description: res.message || "Saved!",
+        });
+        getClassroomList();
+        handleClear();
+      })
+      .catch((err) => {
+        return notify.error({
+          title: "Fail",
+          description: err.message ?? err,
+        });
+      });
+  };
   //DELETE
-  const handleDelete = (id: React.Key | null) => {
+  const handleDelete = (id: number | null) => {
     fetch("/api/classroom", {
       method: "DELETE",
       headers: {
@@ -149,38 +108,26 @@ const ClassRoomPage = () => {
       body: JSON.stringify({ id }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data?.error) {
+      .then((res) => {
+        if (res.error) {
           return notify.error({
             title: "Fail",
-            description: data.error,
+            description: res.error,
           });
         }
-
         notify.success({
           title: "Success",
-          description: "Deleted",
+          description: res.message || "Deleted!",
         });
-
         getClassroomList();
       })
       .catch((err) => {
-        notify.error({
+        return notify.error({
           title: "Fail",
           description: err.message ?? err,
         });
       });
   };
-  //CLEAR
-  const handleClear = () => {
-    setClassroomPayload({
-      id: null,
-      name: "",
-      floor: "",
-      projection_id: null,
-    });
-  };
-
   return (
     <div className="flex-row ">
       <Card>
@@ -214,31 +161,36 @@ const ClassRoomPage = () => {
             </div>
             <div className="col-span-6 lg:col-span-4 ">
               <Typography.Title level={5}>Projection</Typography.Title>
-
-              <Select
-                onSelect={(e) => {
+              <Input
+                className="w-full"
+                value={classroomPayload?.projection}
+                onChange={(e) => {
                   setClassroomPayload((prev) => ({
                     ...prev,
-                    projection_id: e,
+                    projection: e?.target?.value,
                   }));
                 }}
-                value={classroomPayload?.projection_id}
+              />
+            </div>
+            <div className="col-span-6 lg:col-span-4 ">
+              <Typography.Title level={5}>Info</Typography.Title>
+              <Input
                 className="w-full"
-                fieldNames={{ label: "label", value: "id" }}
-                loading={projectionList.length === 0}
-                options={projectionList}
+                value={classroomPayload?.info}
+                onChange={(e) => {
+                  setClassroomPayload((prev) => ({
+                    ...prev,
+                    info: e?.target?.value,
+                  }));
+                }}
               />
             </div>
             <div className="col-span-6 lg:col-span-2 content-end   ">
               <Button
                 size="large"
                 color="blue"
-                loading={loadingButton}
                 variant="filled"
-                onClick={() => {
-                  setLoadingButton(true);
-                  handleSave();
-                }}
+                onClick={handleSave}
                 icon={
                   classroomPayload?.id ? (
                     <IconPencilCheck />
@@ -262,7 +214,7 @@ const ClassRoomPage = () => {
 
         <hr />
         <CardContent>
-          <Table<ClassroomDataType> dataSource={classroomList} rowKey="id">
+          <Table<ClassroomDataType> dataSource={classRoomList} rowKey="id">
             <Column title="Name" dataIndex="name" key="name" />
             <Column title="Floor" dataIndex="floor" key="floor" />
             <Column
@@ -270,6 +222,7 @@ const ClassRoomPage = () => {
               dataIndex="projection"
               key="projection"
             />
+            <Column title="Description" dataIndex="info" key="info" />
             <Column
               title="Actions"
               key="actions"
@@ -278,52 +231,31 @@ const ClassRoomPage = () => {
                   <Button
                     size="small"
                     color="default"
+                    variant="filled"
+                    icon={<IconEdit />}
                     onClick={() =>
                       setClassroomPayload({
                         id: record.id,
                         name: record?.name,
                         floor: record?.floor,
-                        projection_id: record?.projection_id,
+                        projection: record?.projection,
+                        info: record?.info,
                       })
                     }
-                    variant="filled"
-                    icon={<IconEdit />}
                   ></Button>
                   <Button
                     size="small"
                     color="default"
-                    onClick={() =>
-                      setDeleteModalVisible({
-                        id: record.id ?? null,
-                        visible: true,
-                      })
-                    }
                     variant="text"
                     icon={<IconTrash />}
-                  />
+                    onClick={() => handleDelete(record.id)} // Silme işlemi için gerekirse
+                  ></Button>
                 </div>
               )}
             />
           </Table>
         </CardContent>
       </Card>
-      {deleteModalVisible.visible && (
-        <Modal
-          title="Delete Confirmation"
-          open={deleteModalVisible.visible}
-          okText="Yes"
-          onOk={() => {
-            handleDelete(deleteModalVisible.id!);
-            setDeleteModalVisible({ id: null, visible: false });
-          }}
-          onCancel={() => setDeleteModalVisible({ id: null, visible: false })}
-        >
-          <p>Are you sure you want to delete this entry?</p>
-          <p style={{ color: "gray", fontSize: "12px" }}>
-            This action is permanent and cannot be undone.
-          </p>
-        </Modal>
-      )}
     </div>
   );
 };

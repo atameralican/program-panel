@@ -5,8 +5,7 @@ import Link from "next/link"
 import {
   IconLayoutDashboard,   
   IconBooks,             
-  IconBlocks,            
-  IconDeviceProjector,   
+  IconBlocks,           
   IconSchool,            
   IconUserCheck,         
   IconColumns,           
@@ -54,11 +53,6 @@ const data = {
       title: "Module Add",
       url: "/admin/module",
       icon: IconBlocks,
-    },
-    {
-      title: "Projection Add",
-      url: "/admin/projection",
-      icon: IconDeviceProjector,
     },
     {
       title: "Classroom Add",

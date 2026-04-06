@@ -4,7 +4,6 @@ import {
   Typography,
   Table,
   Button,
-  Switch,
   Input,
   InputNumber,
   Select,
@@ -20,11 +19,7 @@ import {
   Card,
   CardAction,
   CardContent,
-  //CardDescription,
-  //CardContent,
-  CardFooter,
   CardHeader,
-  //CardTitle,
 } from "@/components/ui/card";
 import { useNotify } from "@/components/ui/notify-ant-rev";
 interface TeacherDataType {
@@ -33,14 +28,9 @@ interface TeacherDataType {
   room?: string;
   phone_number?: string;
   room_tel?: string;
-  classcode_id?: number | null; // Form için kullandığımız geçici alan
+  classcode_id?: number | null;
   section_limit: number;
   max_limit: number;
-  // Burayı dizi (array) yaptık:
-  selectionnable_classcode_by_teacher?: {
-    classcode_id: number;
-    teacher_id: number;
-  }[];
   stable?: number | null;
 }
 type ClassCodeNameType = {
@@ -68,6 +58,19 @@ const TeacherPage = () => {
     getTeacherList();
     getClassCodeList();
   }, []);
+
+//düzenlemeler
+  const stableOptions = teacherList
+    ?.filter((t) => t.id !== teacherPayload.id)
+    ?.map((t) => ({ label: t.name, value: t.id }));
+
+  const classCodeMap = React.useMemo(() => {
+    return new Map(classCodeList.map((c) => [c.id, c.full_name]));
+  }, [classCodeList]);
+
+  const teacherMap = React.useMemo(() => {
+    return new Map(teacherList.map((t) => [t.id, t.name]));
+  }, [teacherList]);
 
   //CLEAR
   const handleClear = () => {
@@ -248,7 +251,6 @@ const TeacherPage = () => {
             </div>
 
             <div className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
-              {/* Bu alana sonra bakılacak. bu iki for keyden oluşma bi tablo */}
               <Typography.Title level={5}>
                 Selectionnable ClassCode
               </Typography.Title>
@@ -294,11 +296,9 @@ const TeacherPage = () => {
 
             <div className="col-span-12 md:col-span-6 lg:col-span-4 cl:col-span-3">
               <Typography.Title level={5}>Stable</Typography.Title>
-              {/* Bu alana sonra bakılacak */}
               <Select
-                fieldNames={{ label: "name", value: "id" }}
                 className="w-full"
-                options={teacherList}
+                options={stableOptions}
                 value={teacherPayload?.stable || undefined}
                 onChange={(e) =>
                   setTeacherPayload((prev) => ({ ...prev, stable: e }))
@@ -348,19 +348,8 @@ const TeacherPage = () => {
             <Column title="Room Tel" dataIndex="room_tel" key="room_tel" />
             <Column
               title="Selectionnable Section"
-              key="selectionnable_classcode_by_teacher"
-              render={(_, record: TeacherDataType) => {
-                // Dizinin ilk elemanını al
-                const relation =
-                  record.selectionnable_classcode_by_teacher?.[0];
-                const classcodeId = relation?.classcode_id;
-
-                // classCodeList içinde bu ID'ye sahip olanı bul
-                const classCode = classCodeList.find(
-                  (c) => c.id === classcodeId,
-                );
-                return classCode ? classCode.full_name : classcodeId;
-              }}
+              dataIndex="classcode_id"
+              render={(id) => classCodeMap.get(id) ?? id}
             />
             <Column
               title="Section Limit"
@@ -371,14 +360,7 @@ const TeacherPage = () => {
             <Column
               title="Stable"
               dataIndex="stable"
-              key="stable"
-              render={(stable_id) => {
-                // teacherList içinde bu ID'ye sahip olan öğretmeni bul
-                const stableTeacher = teacherList.find(
-                  (t) => t.id === stable_id,
-                );
-                return stableTeacher ? stableTeacher.name : stable_id;
-              }}
+              render={(id) => teacherMap.get(id) ?? id}
             />
             <Column
               title="Actions"
@@ -391,24 +373,16 @@ const TeacherPage = () => {
                     variant="filled"
                     icon={<IconEdit />}
                     onClick={() => {
-                      // Diziden ID'yi güvenli bir şekilde al
-                      const currentClassCodeId =
-                        record.selectionnable_classcode_by_teacher?.[0]
-                          ?.classcode_id || null;
-
                       setTeacherPayload({
                         id: record.id,
                         name: record?.name,
                         room: record?.room,
                         phone_number: record?.phone_number,
                         room_tel: record?.room_tel,
-                        classcode_id: currentClassCodeId, // Buraya atadık
+                        classcode_id: record?.classcode_id,
                         section_limit: record?.section_limit || 1,
                         max_limit: record?.max_limit || 1,
                         stable: record?.stable,
-                        // API'den gelen orijinal diziyi de taşıyalım (isteğe bağlı)
-                        selectionnable_classcode_by_teacher:
-                          record.selectionnable_classcode_by_teacher,
                       });
                     }}
                   />

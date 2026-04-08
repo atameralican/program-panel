@@ -28,49 +28,33 @@ interface TeacherDataType {
   room?: string;
   phone_number?: string;
   room_tel?: string;
-  classcode_id?: number | null;
   section_limit: number;
   max_limit: number;
-  stable?: number | null;
 }
-type ClassCodeNameType = {
-  id: number;
-  full_name: string;
-};
+
 const TeacherPage = () => {
   const [teacherList, setTeacherList] = useState<TeacherDataType[]>([]);
-  const [classCodeList, setClassCodeList] = useState<ClassCodeNameType[]>([]);
   const [teacherPayload, setTeacherPayload] = useState<TeacherDataType>({
     id: null,
     name: "",
     room: "",
     phone_number: "",
     room_tel: "",
-    classcode_id: null,
     section_limit: 1,
     max_limit: 1,
-    stable: null,
   });
   const { Column } = Table;
   const notify = useNotify();
 
   useEffect(() => {
     getTeacherList();
-    getClassCodeList();
   }, []);
 
-//düzenlemeler
-  const stableOptions = teacherList
-    ?.filter((t) => t.id !== teacherPayload.id)
-    ?.map((t) => ({ label: t.name, value: t.id }));
 
-  const classCodeMap = React.useMemo(() => {
-    return new Map(classCodeList.map((c) => [c.id, c.full_name]));
-  }, [classCodeList]);
 
-  const teacherMap = React.useMemo(() => {
-    return new Map(teacherList.map((t) => [t.id, t.name]));
-  }, [teacherList]);
+
+
+
 
   //CLEAR
   const handleClear = () => {
@@ -80,10 +64,8 @@ const TeacherPage = () => {
       room: "",
       phone_number: "",
       room_tel: "",
-      classcode_id: null,
       section_limit: 1,
       max_limit: 1,
-      stable: null,
     });
   };
 
@@ -96,13 +78,7 @@ const TeacherPage = () => {
         setTeacherList(res || []);
       });
   };
-  const getClassCodeList = () => {
-    fetch("/api/classcode/name", {})
-      .then((res) => res?.json())
-      .then((res) => {
-        setClassCodeList(res || []);
-      });
-  };
+
   //ADD & UPDATE
   const handleSave = () => {
     //validasyonlar
@@ -250,20 +226,7 @@ const TeacherPage = () => {
               />
             </div>
 
-            <div className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
-              <Typography.Title level={5}>
-                Selectionnable ClassCode
-              </Typography.Title>
-              <Select
-                fieldNames={{ label: "full_name", value: "id" }}
-                className="w-full"
-                options={classCodeList}
-                value={teacherPayload?.classcode_id || undefined}
-                onChange={(e) =>
-                  setTeacherPayload((prev) => ({ ...prev, classcode_id: e }))
-                }
-              />
-            </div>
+            
 
             <div className="col-span-6 md:col-span-3 lg:col-span-2 xl:col-span-2">
               <Typography.Title level={5}>Section Limit</Typography.Title>
@@ -294,17 +257,7 @@ const TeacherPage = () => {
               />
             </div>
 
-            <div className="col-span-12 md:col-span-6 lg:col-span-4 cl:col-span-3">
-              <Typography.Title level={5}>Stable</Typography.Title>
-              <Select
-                className="w-full"
-                options={stableOptions}
-                value={teacherPayload?.stable || undefined}
-                onChange={(e) =>
-                  setTeacherPayload((prev) => ({ ...prev, stable: e }))
-                }
-              />
-            </div>
+
 
             <div className="col-span-12 md:col-span-3 content-end lg:col-span-4 xl:col-span-2">
               <CardAction className="flex gap-1.5">
@@ -346,22 +299,13 @@ const TeacherPage = () => {
               key="phone_number"
             />
             <Column title="Room Tel" dataIndex="room_tel" key="room_tel" />
-            <Column
-              title="Selectionnable Section"
-              dataIndex="classcode_id"
-              render={(id) => classCodeMap.get(id) ?? id}
-            />
+            
             <Column
               title="Section Limit"
               dataIndex="section_limit"
               key="section_limit"
             />
             <Column title="Max Limit" dataIndex="max_limit" key="max_limit" />
-            <Column
-              title="Stable"
-              dataIndex="stable"
-              render={(id) => teacherMap.get(id) ?? id}
-            />
             <Column
               title="Actions"
               key="actions"
@@ -379,10 +323,8 @@ const TeacherPage = () => {
                         room: record?.room,
                         phone_number: record?.phone_number,
                         room_tel: record?.room_tel,
-                        classcode_id: record?.classcode_id,
                         section_limit: record?.section_limit || 1,
                         max_limit: record?.max_limit || 1,
-                        stable: record?.stable,
                       });
                     }}
                   />

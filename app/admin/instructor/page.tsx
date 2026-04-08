@@ -1,8 +1,8 @@
 
 
   "use client"
-  import React, { JSX } from "react";
-  import {  Typography, Table, Button ,Switch,Input,InputNumber} from 'antd';
+  import React, { JSX, useEffect, useState } from "react";
+  import {  Typography, Table, Button ,Select,Input,InputNumber} from 'antd';
   import { IconXFilled, IconCheckFilled,IconEdit,IconTrash } from "@tabler/icons-react"
   import { ScrollArea } from "@/components/ui/scroll-area"
   import type { ColumnsType } from 'antd/es/table';
@@ -16,112 +16,157 @@
     CardHeader,
     //CardTitle,
   } from "@/components/ui/card"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SortableList from "@/components/dnd-list";
-interface CellData {
-  type: 'busy' | 'assigned';
-  text: string;
+import WeeklySchedulePicker from "@/components/WeeklySchedulePicker";
+ 
+
+interface GenericDataType {
+  id: number | null;
+  name?: string;
+  full_name?: string;
+  modules?:any;
 }
 
-interface ScheduleRow {
-  time: string;
-  monday: CellData | null;
-  tuesday: CellData | null;
-  wednesday: CellData | null;
-  thursday: CellData | null;
-  friday: CellData | null;
+interface ProgramTimeSlot {
+  time_slot_id: number;
+  program_id: number;
+  time_slots: {
+    id: number;
+    day: string;
+    name: string;
+    end_time: string;
+    start_time: string;
+  }
+}
+
+interface SelectedDataType {
+  classcode_id: number | null;
+  person_limit: number;
+  // Diğer alanlar burada tanımlanabilir  
 }
   const InstructorPage = () => {
-   const dummy: ScheduleRow[] = [
-    { time: '09:00 - 09:50', monday: null, tuesday: { type: 'busy', text: 'Ali Veli' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: null, friday: null },
-    { time: '10:00 - 10:50', monday: null, tuesday: { type: 'busy', text: 'Ali Veli' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: null, friday: null },
-    { time: '11:00 - 11:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'busy', text: 'Ali Veli' }, thursday: null, friday: null },
-    { time: '12:00 - 12:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Assignment to' } },
-    { time: '13:00 - 13:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Assignment to' } },
-    { time: '14:00 - 14:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Assignment to' } },
-    { time: '15:00 - 15:50', monday: null, tuesday: { type: 'assigned', text: 'Assignment to' }, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: { type: 'assigned', text: 'Assignment to' }, friday: { type: 'assigned', text: 'Ayşe Fatma' } },
-    { time: '16:00 - 16:50', monday: null, tuesday: null, wednesday: { type: 'assigned', text: 'Assignment to' }, thursday: null, friday: { type: 'assigned', text: 'Ayşe Fatma' } },
-  ];
+    const [periodList, setPeriodList] = useState();
+    const [termList, setTermList] = useState([]);
+const [classcodeList, setClasscodeList] = useState<GenericDataType[]>([]);
+const [classroomList, setClassroomList] = useState<GenericDataType[]>([]);
+const [teacherList, setTeacherList] = useState([]);
+const [timeSlotList, setTimeSlotList] = useState<number[]>([]);
+const [selectedData, setSelectedData] = useState({classcode_id:null, person_limit: 0});
+useEffect(() => {
+getResponseList();
+}, []);
 
-  const columns: ColumnsType<ScheduleRow> = [
-    {
-      title: '',
-      dataIndex: 'time',
-      key: 'time',
-      width: 150,
-      fixed: 'left',
-    },
-    {
-      title: 'Monday',
-      dataIndex: 'monday',
-      key: 'monday',
-      render: (cell: CellData | null) => renderCell(cell),
-    },
-    {
-      title: 'Tuesday',
-      dataIndex: 'tuesday',
-      key: 'tuesday',
-      render: (cell: CellData | null) => renderCell(cell),
-    },
-    {
-      title: 'Wednesday',
-      dataIndex: 'wednesday',
-      key: 'wednesday',
-      render: (cell: CellData | null) => renderCell(cell),
-    },
-    {
-      title: 'Thursday',
-      dataIndex: 'thursday',
-      key: 'thursday',
-      render: (cell: CellData | null) => renderCell(cell),
-    },
-    {
-      title: 'Friday',
-      dataIndex: 'friday',
-      key: 'friday',
-      render: (cell: CellData | null) => renderCell(cell),
-    },
-  ];
+const getResponseList=async()=>{
+await fetch("/api/period", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setPeriodList(res || []);
+      });
+      await fetch("/api/classcode/name", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setClasscodeList(res || []);
+      });
+await fetch("/api/classroom/name", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setClassroomList(res || []);
+      });
+await fetch("/api/teacher/name", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setTeacherList(res || []);
+      });
+}
+const getTimeSlotbyClasscode = async (programId: number) => {
+  try {
+    const response = await fetch(`/api/program-time-slot/${programId}`);
+    const data: ProgramTimeSlot[] = await response.json(); // Tipi burada belirttik
+    
+    const timeSlotIds = data.map(item => item?.time_slot_id);
+    setTimeSlotList(timeSlotIds);
+  } catch (error) {
+    console.error("Veri çekilirken hata oluştu:", error);
+  }
+};
+useEffect(() => {
 
-  const renderCell = (cell: CellData | null): JSX.Element | null => {
-    if (!cell) return null;
-    
-    const className = cell.type === 'busy' ? 'cell-busy' : 'cell-assigned';
-    
-    return (
-      <div className={className}>
-        {cell.text}
-      </div>
-    );
-  };
+  if (selectedData?.classcode_id) {
+    const selectClasscode= classcodeList.find((c) => c.id === selectedData?.classcode_id)
+    if (selectClasscode) {
+    const programId=selectClasscode?.modules?.program_id
+    console.log("programId",programId);
+    getTimeSlotbyClasscode(programId);
+  }
+  }
+  console.log("classcode_id",selectedData?.classcode_id);
   
+}, [selectedData?.classcode_id]);
+
     return (
       <div className="flex-row ">
         <Card>
           <CardHeader className="">
             <div className="grid  grid-cols-12 gap-4">
-             
-              <div className="col-span-6 lg:col-span-4 ">
-                <Typography.Title level={5}>Section</Typography.Title>
-                <Select >
-                  <SelectTrigger className="w-full ">
-                    <SelectValue placeholder="Section Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {/* Kayıtlı projectionlar servisten gelecek. */}
-                      <SelectItem value="1">Ahmet Mehme t</SelectItem>
-                      <SelectItem value="2">Ayşe Fatma</SelectItem>
-                      <SelectItem value="3">Ali Veli</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+  
+   <div className="col-span-6 lg:col-span-3">
+                <Typography.Title level={5}>Period</Typography.Title>
+                <Select
+                                fieldNames={{ label: "name", value: "id" }}
+                                className="w-full"
+                                options={periodList}
+                              />
               </div>
+   <div className="col-span-6 lg:col-span-3">
+                <Typography.Title level={5}>ClassCode</Typography.Title>
+                  <Select
+                                fieldNames={{ label: "full_name", value: "id" }}
+                                className="w-full"
+                                options={classcodeList}
+                                value={selectedData?.classcode_id }
+                onChange={(e) =>
+                  setSelectedData((prev) => ({ ...prev, classcode_id: e }))
+                }
+                              />
+              </div>
+   <div className="col-span-6 lg:col-span-3">
+                <Typography.Title level={5}>Classroom</Typography.Title>
+                <Select
+                                fieldNames={{ label: "name", value: "id" }}
+                                className="w-full"
+                                options={classroomList}
+                              />
+              </div>
+
+    <div className="col-span-6 lg:col-span-3">
+                <Typography.Title level={5}>One Person Max Limit</Typography.Title>
+                <InputNumber
+                                className="w-full"
+                                min={0}
+                                max={40}
+                                value={selectedData?.person_limit}
+                                onChange={(e) =>
+                                  setSelectedData((prev) => ({
+                                    ...prev,
+                                    person_limit: e ||0,
+                                  }))
+                                }
+                              />
+              </div>
+              {/*
+   <div className="col-span-6 lg:col-span-3">
+                <Typography.Title level={5}>TotalLimit ?</Typography.Title>
+                 <Input
+                  className="w-full"
+                />
+              </div> */}
+
+             
 
               <div className="col-span-6">
                 <Typography.Title level={5}>Teacher List</Typography.Title>
                 <ScrollArea className="h-50 w-full p-2  rounded-md border">
-                  <SortableList/>
+                  <SortableList teacherList={teacherList} person_limit={selectedData?.person_limit} />
                 </ScrollArea>
               </div>
               <div className="col-span-6 lg:col-span-2 content-end   ">
@@ -145,17 +190,24 @@ interface ScheduleRow {
 
           <hr />
           <CardContent>
-             <Table
+            seçime göre tablo burada olacak
+            {/* <Table
         columns={columns}
         dataSource={dummy}
         pagination={false}
         bordered
         rowKey="time"
-      />
+      /> */}
+      <WeeklySchedulePicker
+                  selected={timeSlotList}
+                  viewMode
+                //  onChange={handleChangeSlotTable}
+                 // maxSelections={selectedData.max_limit} // girilen max limiti yazacağız.
+                />
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  export default InstructorPage
+  export default InstructorPage;

@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
-import { Typography, Table, Button, Switch, Input, InputNumber } from "antd";
+import React, { useEffect, useState } from "react";
+import { Typography, Table, Button, Select, Input, InputNumber } from "antd";
 import {
   IconXFilled,
   IconCheckFilled,
   IconEdit,
   IconTrash,
+  IconPencilCheck,
 } from "@tabler/icons-react";
 import {
   Card,
@@ -17,52 +18,149 @@ import {
   CardHeader,
   //CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useNotify } from "@/components/ui/notify-ant-rev";
+type ClasscodeType = {
+  id: number | null;
+  full_name?: string ;
+  code: string ;
+  module_id: number | null;
+};
+
+
+type ModuleType={
+  id: number | null;
+  name: string;
+  program_id: number | null;
+  code: string;
+}
+
 
 const ClassCodePage = () => {
   const { Column } = Table;
-  interface DataType {
-    key: React.Key;
-    name?: string;
-    modul?: string;
-    classroom?: string;
-    floor?: string;
-    program?: string;
-  }
+  const notify = useNotify();
+  const [classcodePayload, setClasscodePayload] = useState<ClasscodeType>({
+    id: null,
+    full_name: "",
+    code: "",
+    module_id: null,
+  });
+  const [classCodeList, setClassCodeList] = useState<ClasscodeType[]>([]);
+  const [moduleList, setModuleList] = useState<ModuleType[]>([]);
+  useEffect(() => {
+    getClasscodeList();
+    getModulesandClassrooms();
+  }, []);
 
-  const data: DataType[] = [
-    {
-      key: "1",
-      name: "A06",
-      modul: "M20",
-      classroom: "S07",
-      floor: "0",
-      program: "Program1",
-    },
-    {
-      key: "2",
-      name: "A07",
-      modul: "M01",
-      classroom: "A09",
-      floor: "1",
-      program: "Program2",
-    },
-    {
-      key: "3",
-      name: "B08",
-      modul: "K11",
-      classroom: "M7",
-      floor: "0",
-      program: "Program3",
-    },
-  ];
+  const handleClear = () => {
+    setClasscodePayload({ id: null, full_name: "", code: "", module_id: null });
+  };
+
+  const moduleMap = React.useMemo(() => {
+    return new Map(moduleList.map((m) => [m.id, m.code]));
+  }, [moduleList]);
+
+  ///////// CRUD İŞLEMLERİ ////////
+  //GET
+  const getClasscodeList = () => {
+    fetch("/api/classcode", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setClassCodeList(res || []);
+      });
+  };
+  const getModulesandClassrooms = async () => {
+    await fetch("/api/module", {})
+      .then((res) => res?.json())
+      .then((res) => {
+        setModuleList(res || []);
+      });
+  };
+
+  //SAVE AND UPDATE
+  const handleSave = async () => {
+    if (classcodePayload.code.trim() === "") {
+      notify.error({
+        title: "Fail",
+        description: "The class code cannot be empty!",
+      });
+      return;
+    }
+
+    if (classcodePayload.module_id === null) {
+      notify.error({
+        title: "Fail",
+        description: "The module cannot be empty!",
+      });
+      return;
+    }
+    const full_name =
+      (await moduleList?.find((m) => m.id === classcodePayload.module_id)
+        ?.code) +
+      "-" +
+      classcodePayload.code;
+
+    //Save Action
+    await fetch("/api/classcode", {
+      method: classcodePayload.id ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...classcodePayload, full_name: full_name }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.error) {
+          return notify.error({
+            title: "Fail",
+            description: res.error,
+          });
+        }
+        notify.success({
+          title: "Success",
+          description: res.message || "Saved!",
+        });
+        getClasscodeList();
+        handleClear();
+      })
+      .catch((err) => {
+        return notify.error({
+          title: "Fail",
+          description: err.message ?? err,
+        });
+      });
+  };
+
+  //DELETE
+  const handleDelete = (id: number | null) => {
+    fetch("/api/classcode", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.error) {
+          return notify.error({
+            title: "Fail",
+            description: res.error,
+          });
+        }
+        notify.success({
+          title: "Success",
+          description: res.message || "Deleted!",
+        });
+        getClasscodeList();
+      })
+      .catch((err) => {
+        return notify.error({
+          title: "Fail",
+          description: err.message ?? err,
+        });
+      });
+  };
+
   return (
     <div className="flex-row ">
       <Card>
@@ -70,84 +168,95 @@ const ClassCodePage = () => {
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-6 lg:col-span-3">
               <Typography.Title level={5}>Module</Typography.Title>
-              <Select value="2">
-                <SelectTrigger className="w-full ">
-                  <SelectValue placeholder="Modul Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {/* Kayıtlı moduller servisten gelecek. */}
-                    <SelectItem value="mod1">Modul1</SelectItem>
-                    <SelectItem value="mod2">Modul2</SelectItem>
-                    <SelectItem value="mod3">Modul3</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <Select
+                fieldNames={{ label: "code", value: "id" }}
+                className="w-full"
+                options={moduleList}
+                value={classcodePayload?.module_id}
+                onChange={(e) =>
+                  setClasscodePayload((prev) => ({ ...prev, module_id: e }))
+                }
+              />
             </div>
             <div className="col-span-6 lg:col-span-3">
-              <Typography.Title level={5}>Section Code</Typography.Title>
-              <Input className="w-full" />
+              <Typography.Title level={5}>Class Code</Typography.Title>
+              <Input
+                className="w-full"
+                value={classcodePayload?.code}
+                onChange={(e) => {
+                  setClasscodePayload((prev) => ({
+                    ...prev,
+                    code: e?.target?.value,
+                  }));
+                }}
+              />
             </div>
-            
-            <div className="col-span-6 lg:col-span-3">
-              <Typography.Title level={5}>Classroom</Typography.Title>
-              <Select value="2">
-                <SelectTrigger className="w-full ">
-                  <SelectValue placeholder="Classroom Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {/* Kayıtlı clasrooms servisten gelecek. */}
-                    <SelectItem value="a103">A103</SelectItem>
-                    <SelectItem value="c203">C203</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+
             <div className="col-span-6 lg:col-span-3 content-end">
               <Button
                 size="large"
                 color="blue"
                 variant="filled"
-                icon={<IconCheckFilled />}
-              ></Button>
+                onClick={handleSave}
+                icon={
+                  classcodePayload?.id ? (
+                    <IconPencilCheck />
+                  ) : (
+                    <IconCheckFilled />
+                  )
+                }
+              />
               <Button
                 size="large"
                 danger
                 className="ms-2"
                 color="danger"
+                onClick={() => handleClear()}
                 variant="filled"
                 icon={<IconXFilled />}
-              ></Button>
+              />
             </div>
           </div>
         </CardHeader>
 
         <hr />
         <CardContent>
-          <Table<DataType> dataSource={data}>
-            <Column title="Section Name" dataIndex="name" key="name" />
-            <Column title="Modul" dataIndex="modul" key="modul" />
-            <Column title="Classroom" dataIndex="classroom" key="classroom" />
-            <Column title="Floor" dataIndex="floor" key="floor" />
-            <Column title="Program" dataIndex="program" key="program" />
+          <Table<ClasscodeType> dataSource={classCodeList} rowKey="id">
+            <Column
+              title="Section Name"
+              dataIndex="full_name"
+              key="full_name"
+            />
+            <Column title="Code" dataIndex="code" key="code" />
+            <Column
+              title="Module"
+              dataIndex="module_id"
+              render={(id) => moduleMap.get(id) ?? id}
+            />
             <Column
               title="Actions"
-              dataIndex="wednesday"
-              key="wednesday"
-              render={() => (
+              key="actions"
+              render={(_, record: ClasscodeType) => (
                 <div className="flex gap-2">
                   <Button
                     size="small"
                     color="default"
                     variant="filled"
                     icon={<IconEdit />}
+                    onClick={() =>
+                      setClasscodePayload({
+                        id: record.id,
+                        code: record?.code,
+                        module_id: record?.module_id,
+                      })
+                    }
                   ></Button>
                   <Button
                     size="small"
                     color="default"
                     variant="text"
                     icon={<IconTrash />}
+                    onClick={() => handleDelete(record.id)} // Silme işlemi için gerekirse
                   ></Button>
                 </div>
               )}

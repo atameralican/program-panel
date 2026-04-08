@@ -17,6 +17,7 @@ export interface WeeklySchedulePickerProps {
   selected?: number[];
   onChange?: (selectedIds: number[]) => void;
   maxSelections?: number;
+  viewMode?:boolean; // true olursa sadece görüntüleme yapılır, seçim yapılamaz.
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
@@ -26,6 +27,7 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 export default function WeeklySchedulePicker({
   selected: controlledSelected,
   onChange,
+  viewMode=false,
   maxSelections,
 }: WeeklySchedulePickerProps) {
   const [internalSelected, setInternalSelected] = useState<Set<number>>(
@@ -103,7 +105,7 @@ useEffect(() => {
   return (
     <div className="w-full space-y-4">
       {/* ── seçilen sayı kontrolü ve tümünü temizle alanı---- */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
+     {!viewMode&& <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20">
             {selectedSet.size} saat seçildi
@@ -123,7 +125,7 @@ useEffect(() => {
         >
           Tümünü temizle
         </button>
-      </div>
+      </div>}
 
       {/* ── Tablo */}
       <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
@@ -196,6 +198,7 @@ useEffect(() => {
       </div>
 
       {/* ── Seçilen slotlar label alanı. büyük ekranda görünür. Üzerine tıklanılınca siler*/}
+      {!viewMode&&
       <div className="space-y-2 hidden lg:block">
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Seçilen saatler
@@ -220,7 +223,7 @@ useEffect(() => {
             ))}
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

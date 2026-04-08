@@ -6,7 +6,7 @@ export async function GET(req: Request) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
         .from('classcodes')
-        .select(`*,modules(id,code),classrooms(id,name)`)
+        .select(`*,modules(id,code)`)
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }

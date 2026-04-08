@@ -16,7 +16,6 @@ import { DeleteDataType } from "@/lib/types";
 interface ClassroomDataType {
   id: number | null;
   name: string;
-  floor?: string;
   projection?: string;
   info?: string;
 }
@@ -26,7 +25,6 @@ const ClassRoomPage = () => {
   const [classroomPayload, setClassroomPayload] = useState<ClassroomDataType>({
     id: null,
     name: "",
-    floor: "",
     projection: "",
     info: "",
   });
@@ -42,7 +40,6 @@ const ClassRoomPage = () => {
     setClassroomPayload({
       id: null,
       name: "",
-      floor: "",
       projection: "",
       info: "",
     });
@@ -146,19 +143,7 @@ const ClassRoomPage = () => {
                 }}
               />
             </div>
-            <div className="col-span-6 lg:col-span-3 ">
-              <Typography.Title level={5}>Floor</Typography.Title>
-              <Input
-                className="w-full"
-                value={classroomPayload?.floor}
-                onChange={(e) => {
-                  setClassroomPayload((prev) => ({
-                    ...prev,
-                    floor: e?.target?.value,
-                  }));
-                }}
-              />
-            </div>
+            
             <div className="col-span-6 lg:col-span-4 ">
               <Typography.Title level={5}>Projection</Typography.Title>
               <Input
@@ -216,13 +201,12 @@ const ClassRoomPage = () => {
         <CardContent>
           <Table<ClassroomDataType> dataSource={classRoomList} rowKey="id">
             <Column title="Name" dataIndex="name" key="name" />
-            <Column title="Floor" dataIndex="floor" key="floor" />
             <Column
               title="Projection"
               dataIndex="projection"
               key="projection"
             />
-            <Column title="Description" dataIndex="info" key="info" />
+            <Column title="Info" dataIndex="info" key="info" />
             <Column
               title="Actions"
               key="actions"
@@ -237,7 +221,6 @@ const ClassRoomPage = () => {
                       setClassroomPayload({
                         id: record.id,
                         name: record?.name,
-                        floor: record?.floor,
                         projection: record?.projection,
                         info: record?.info,
                       })

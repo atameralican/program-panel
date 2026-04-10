@@ -16,7 +16,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("schedule")
-    .select("*,teachers(id,name),classrooms(id,name)")
+    .select("id,time_slot_id,teachers(id,name),classrooms(id,name)")
     .eq("classcode_id", numericClass)
     .eq("period_id", numericPeriod);
 

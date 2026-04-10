@@ -12,7 +12,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('program_time_slot')
-    .select(`*,time_slots(*)`)
+    .select(`time_slot_id`)
     .eq("program_id", numericId); 
     
   if (error) {

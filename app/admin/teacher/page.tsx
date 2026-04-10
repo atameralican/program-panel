@@ -6,7 +6,6 @@ import {
   Button,
   Input,
   InputNumber,
-  Select,
 } from "antd";
 import {
   IconXFilled,
@@ -28,8 +27,6 @@ interface TeacherDataType {
   room?: string;
   phone_number?: string;
   room_tel?: string;
-  section_limit: number;
-  max_limit: number;
 }
 
 const TeacherPage = () => {
@@ -40,8 +37,6 @@ const TeacherPage = () => {
     room: "",
     phone_number: "",
     room_tel: "",
-    section_limit: 1,
-    max_limit: 1,
   });
   const { Column } = Table;
   const notify = useNotify();
@@ -64,8 +59,6 @@ const TeacherPage = () => {
       room: "",
       phone_number: "",
       room_tel: "",
-      section_limit: 1,
-      max_limit: 1,
     });
   };
 
@@ -89,20 +82,7 @@ const TeacherPage = () => {
       });
       return;
     }
-    if (!teacherPayload.section_limit || teacherPayload.section_limit < 1) {
-      notify.error({
-        title: "Fail",
-        description: "Section limit cannot be zero!",
-      });
-      return;
-    }
-    if (!teacherPayload.max_limit || teacherPayload.max_limit < 1) {
-      notify.error({
-        title: "Fail",
-        description: "Max limit cannot be zero!",
-      });
-      return;
-    }
+
 
     //Save Action
     fetch("/api/teacher", {
@@ -228,7 +208,7 @@ const TeacherPage = () => {
 
             
 
-            <div className="col-span-6 md:col-span-3 lg:col-span-2 xl:col-span-2">
+            {/* <div className="col-span-6 md:col-span-3 lg:col-span-2 xl:col-span-2">
               <Typography.Title level={5}>Section Limit</Typography.Title>
               <InputNumber
                 className="w-full"
@@ -255,7 +235,7 @@ const TeacherPage = () => {
                   setTeacherPayload((prev) => ({ ...prev, max_limit: e || 23 }))
                 }
               />
-            </div>
+            </div> */}
 
 
 
@@ -299,13 +279,6 @@ const TeacherPage = () => {
               key="phone_number"
             />
             <Column title="Room Tel" dataIndex="room_tel" key="room_tel" />
-            
-            <Column
-              title="Section Limit"
-              dataIndex="section_limit"
-              key="section_limit"
-            />
-            <Column title="Max Limit" dataIndex="max_limit" key="max_limit" />
             <Column
               title="Actions"
               key="actions"
@@ -323,8 +296,6 @@ const TeacherPage = () => {
                         room: record?.room,
                         phone_number: record?.phone_number,
                         room_tel: record?.room_tel,
-                        section_limit: record?.section_limit || 1,
-                        max_limit: record?.max_limit || 1,
                       });
                     }}
                   />

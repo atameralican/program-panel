@@ -17,6 +17,7 @@ export interface TimeSlot {
 export interface WeeklySchedulePickerProps {
   selected?: number[];
   scheduleListbyClasscode?:ScheduleDataType[];
+  previewSlotList?:ScheduleDataType[];
   scheduleListbyClassroom?:number[];
   onChange?: (selectedIds: number[]) => void;
   maxSelections?: number;
@@ -31,6 +32,7 @@ export default function WeeklySchedulePicker({
   selected: controlledSelected,
   onChange,
   scheduleListbyClasscode,
+  previewSlotList,
   scheduleListbyClassroom,
   viewMode=false,
   maxSelections,
@@ -111,6 +113,10 @@ useEffect(() => {
  const scheduleMap = new Map(
   scheduleListbyClasscode?.map((s) => [s.time_slot_id, s]) ?? []
 );
+// önizleme ekranında atanan slotlar için
+ const previewMap = new Map(
+  previewSlotList?.map((s) => [s.time_slot_id, s]) ?? []
+);
 // Classromdan gelen slot id listesi. eğer ders varsa seçilen classroomda perioda göre tabi. 
 const classroomDisabledSet = new Set(scheduleListbyClassroom ?? []);
   return (
@@ -173,6 +179,8 @@ const classroomDisabledSet = new Set(scheduleListbyClassroom ?? []);
                   const isSelected = slot ? selectedSet.has(slot.id) : false;
                   const schedule = slot ? scheduleMap.get(slot.id) : undefined; 
                   const isScheduled = !!schedule;
+                  const preview = slot ? previewMap.get(slot.id) : undefined; 
+                  const isPreview = !!preview;
                   const isClassroomDisabled = slot ? classroomDisabledSet.has(slot.id) : false;
                   const isDisabled = !slot ||(atMax && !isSelected);
 const isViewMode=viewMode===true?true:false
@@ -186,7 +194,7 @@ const isViewMode=viewMode===true?true:false
                     >
                       {slot ? (
                         <button
-                          onClick={() => toggle(slot.id)}
+                          onClick={() => !viewMode&&toggle(slot.id)}
                           disabled={isDisabled}
                           aria-pressed={isSelected}
                           aria-label={`${day} ${time}`}
@@ -197,6 +205,8 @@ const isViewMode=viewMode===true?true:false
         ? `${schedule?.teachers?.name} - ${schedule?.classrooms?.name}`
         : isDisabled
           ? "Seçim yapılamaz"
+          :isPreview
+          ? "Önizleme"
           : `${day} ${time} seç`
   }
                           className={cn(
@@ -207,6 +217,8 @@ const isViewMode=viewMode===true?true:false
                               ? "bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-600"
                               : isScheduled
                                 ? "bg-red-400 dark:bg-red-600 text-white shadow-sm ring-1 ring-red-500 cursor-default"
+                                :isPreview
+                                ?"bg-blue-500 dark:bg-blue-600 text-white shadow-sm ring-1 ring-blue-700 cursor-default" 
                                 : isClassroomDisabled
                                   ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-2 ring-amber-400 cursor-not-allowed"
                                   : isDisabled
@@ -225,7 +237,16 @@ const isViewMode=viewMode===true?true:false
                                 {schedule?.classrooms?.name}
                               </span>
                             </>
-                          ) : (
+                          ) : isPreview && preview ? ( 
+                            <>
+                              <span className="font-semibold leading-none truncate w-full text-center px-1">
+                                {preview?.teachers?.name}
+                              </span>
+                              <span className="opacity-80 leading-none text-[10px]">
+                                {preview?.classrooms?.name}
+                              </span>
+                            </>
+                          ) :(
                             <span className="tabular-nums">{time}</span>
                           )}
                         </button>

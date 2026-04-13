@@ -2,8 +2,8 @@
 
     "use client"
     import React, { JSX, useEffect, useState } from "react";
-    import {  Typography, Table, Button ,Select,Input,InputNumber} from 'antd';
-    import { IconXFilled, IconCheckFilled,IconEdit,IconTrash } from "@tabler/icons-react"
+    import {  Typography, Table, Button ,Select,Input,InputNumber, message, Modal} from 'antd';
+    import { IconXFilled, IconCheckFilled,IconEdit,IconTrash, IconEyeCheck } from "@tabler/icons-react"
     import { ScrollArea } from "@/components/ui/scroll-area"
     import type { ColumnsType } from 'antd/es/table';
     import {
@@ -20,6 +20,9 @@
   import WeeklySchedulePicker from "@/components/WeeklySchedulePicker";
   
 
+
+  
+
   interface GenericDataType {
     id: number | null;
     name?: string;
@@ -30,6 +33,8 @@
     id: number;
     name: string;
     lesson_count?:number;
+    maxSlot:number;
+    enabled?:boolean;
   };
   interface ProgramTimeSlot {
     time_slot_id: number;
@@ -37,7 +42,6 @@
 
   interface SelectedDataType {
     classcode_id: number | null;
-    teacher_id: number | null;
     period_id: number | null;
     classroom_id: number | null;
     person_limit: number;
@@ -54,12 +58,74 @@
     teacher_id:number;
     lesson_count:number;
   }
+  
+  interface AssignmentRow {
+  teacher_id: number;
+  teacher_name: string;
+  classroom_id: number;
+  classroom_name: string;
+  time_slot_ids: number[];
+}
 
+function buildAssignment(
+  sortedTeachers: TeacherType[],// teacherStates,
+  availableSlots: number[], // timeSlotList – boş slotlar//   timeSlotList,
+  classroomId: number,//   selectedData.classroom_id,
+  classroomName: string//   classroomName
+): AssignmentRow[] {
+
+  const result: AssignmentRow[] = [];
+  let slotCursor = 0;
+
+  for (const teacher of sortedTeachers) {
+    if (!teacher.enabled || teacher.maxSlot <= 0) continue;
+    if (slotCursor >= availableSlots.length) break;
+
+    const assigned: number[] = [];
+    while (
+      assigned.length < teacher.maxSlot &&
+      slotCursor < availableSlots.length
+    ) {
+      assigned.push(availableSlots[slotCursor]);
+      slotCursor++;
+    }
+
+    if (assigned.length > 0) {
+      result.push({
+        teacher_id: teacher.id,
+        teacher_name: teacher.name,
+        classroom_id: classroomId,
+        classroom_name: classroomName,
+        time_slot_ids: assigned,
+      });
+    }
+  }
+console.log("result",result)
+  return result;
+}
+
+/** AssignmentRow[] → WeeklySchedulePicker'ın beklediği ScheduleDataType[] */
+function toPreviewSchedule(rows: AssignmentRow[]): ScheduleDataType[] {
+  return rows.flatMap((row) =>
+    row.time_slot_ids.map((slotId) => ({
+      id: null,
+      time_slot_id: slotId,
+      teachers: { id: row.teacher_id, name: row.teacher_name },
+      classrooms: { id: row.classroom_id, name: row.classroom_name },
+    }))
+  );
+}
     const InstructorPage = () => {
       const [periodList, setPeriodList] = useState();
+      const [showPreview, setShowPreview] = useState(false);
       const [classcodeList, setClasscodeList] = useState<GenericDataType[]>([]);
+        const [assignmentRows, setAssignmentRows] = useState<AssignmentRow[]>([]);
+          const [previewSchedule, setPreviewSchedule] = useState<ScheduleDataType[]>(
+            []
+          );
       const [classroomList, setClassroomList] = useState<GenericDataType[]>([]);
       const [teacherList, setTeacherList] = useState<TeacherType[]>([]);
+      const [teacherState, setTeacherState] = useState<TeacherType[]>([]);
       const [scheduleListbyClasscode, setScheduleListbyClasscode] = useState<
         ScheduleDataType[]
       >([]);
@@ -70,10 +136,12 @@
       const [selectedData, setSelectedData] = useState<SelectedDataType>({
         classcode_id: null,
         person_limit: 0,
-        teacher_id: null,
         period_id: null,
         classroom_id: null,
       });
+      useEffect(() => {
+        console.log("teacherState",teacherState)
+      }, [teacherState]);
       useEffect(() => {
         getResponseList();
       }, []);
@@ -101,6 +169,8 @@
             const updatedList = (res || []).map((prev: TeacherType) => ({
               ...prev,
               lesson_count: 0,
+              maxSlot:0,
+              enabled:false
             }));
             setTeacherList(updatedList || []);
           });
@@ -129,11 +199,7 @@
           console.error(error);
         }
       };
-      useEffect(() => {
-        if (selectedData?.period_id) {
-          getTeacherSlotCount();
-        }
-      }, [selectedData?.period_id]);
+      
       //Şu an da yapı classcode seçilince servislere gidiyor. yaptığı işlem
       /**OLMASI GEREKEN
        * PERİOD VE CLASSCODE SEÇİLİNCE O CLASSCODEUN O PERİODDAKİ SCHEDULE BİLGİSİNİ GETİR.
@@ -207,7 +273,7 @@
           setTimeSlotList([]);
           setScheduleListbyClasscode([]);
         }
-      }, [selectedData?.classcode_id, selectedData?.period_id]);
+      }, [selectedData?.classcode_id]);
 
       useEffect(() => {
         if (selectedData.period_id && selectedData.classroom_id) {
@@ -215,15 +281,34 @@
         } else {
           setScheduleListbyClassroom([]);
         }
-      }, [selectedData?.classroom_id, selectedData?.period_id]);
-
+      }, [selectedData?.classroom_id]);
       //classroom değiştiğinde o classroomun schedulerda o proiodda timeSlotlarında çakışma var mı kontrol için
+
+      useEffect(() => {
+        if (selectedData?.period_id) {
+          setSelectedData((prev) => ({
+            ...prev,
+            classcode_id: null,
+            person_limit: 0,
+            classroom_id: null,
+          }));
+        }
+        setTimeSlotList([]);
+        setTeacherList((prev) =>
+          prev.map((t) => {
+            return { ...t, lesson_count: 0 };
+          }),
+        );
+        
+        setScheduleListbyClassroom([]);
+        getTeacherSlotCount();
+        setScheduleListbyClasscode([]);
+      }, [selectedData?.period_id]);
 
       const handleClear = () => {
         setSelectedData({
           classcode_id: null,
           person_limit: 0,
-          teacher_id: null,
           period_id: null,
           classroom_id: null,
         });
@@ -233,6 +318,92 @@
               }),
             );
       };
+
+
+      const handlePreview = () => {
+        if (
+          !selectedData?.period_id ||
+          !selectedData?.classcode_id ||
+          !selectedData?.classroom_id ||
+          !selectedData?.person_limit
+        ) {
+          message.warning("Lütfen İlgili Alanları Doldurunuz");
+          return;
+        }
+        if (timeSlotList.length < 1) {
+          message.warning("Atanacak Uygun Saat Bulunmamaktadır");
+          return;
+        }
+        if (!teacherState.some((t) => t.enabled && (t.maxSlot ?? 0) > 0)) {
+          message.warning("Teacher Max Ders Saati Girilmemiştir");
+          return;
+        }
+        const classroom = classroomList.find(
+          (c) => c.id === selectedData.classroom_id,
+        );
+        const classroomName =
+          classroom?.name ?? `Derslik #${selectedData.classroom_id}`;
+
+        const newTimeSlotList = timeSlotList.filter(
+          (item) => !scheduleListbyClassroom?.includes(item),
+        ); //eğer seçilen classroomda ders varsa o slota eklememesi için.
+        const rows = buildAssignment(
+          teacherState,
+          newTimeSlotList,
+          selectedData.classroom_id,
+          classroomName,
+        );
+
+        setAssignmentRows(rows);
+        setPreviewSchedule(toPreviewSchedule(rows));
+        setShowPreview(true);
+      };
+
+
+
+        const handleSave = async () => {
+          if (assignmentRows.length === 0) return;
+          if (
+            !selectedData.classcode_id ||
+            !selectedData.period_id ||
+            !selectedData.classroom_id
+          ) {
+            message.error("Classcode, Period ve Classroom seçili olmalı.");
+            return;
+          }
+      
+          // Toplu kayıt payload'ı
+          const records = assignmentRows.flatMap((row) =>
+            row.time_slot_ids.map((slotId) => ({
+              classcode_id: selectedData.classcode_id,
+              teacher_id: row.teacher_id,
+              time_slot_id: slotId,
+              period_id: selectedData.period_id,
+              classroom_id: row.classroom_id,
+            }))
+          );
+      console.log("records",records)
+          // setSaving(true);
+          // try {
+          //   const res = await fetch("/api/schedule/save-bulk", {
+          //     method: "POST",
+          //     headers: { "Content-Type": "application/json" },
+          //     body: JSON.stringify({ records }),
+          //   });  
+      
+          //   if (!res.ok) {
+          //     const err = await res.json().catch(() => ({}));
+          //     throw new Error(err?.message ?? "Sunucu hatası");
+          //   }
+      
+          //   message.success(`${records.length} kayıt başarıyla oluşturuldu.`);
+          //   handleClear();
+          // } catch (err: any) {
+          //   message.error(`Kayıt başarısız: ${err.message}`);
+          // } finally {
+          //   // setSaving(false);
+          // }
+        };
       return (
         <div className="flex-row ">
           <Card>
@@ -293,12 +464,13 @@
                   />
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 lg:col-span-8">
                   <Typography.Title level={5}>Teacher List</Typography.Title>
-                  <ScrollArea className="h-50 w-full p-2  rounded-md border">
+                  <ScrollArea className="h-64 w-full p-2 rounded-md border">
                     <SortableList
                       teacherList={teacherList}
                       person_limit={selectedData?.person_limit}
+                      onTeacherStateChange={setTeacherState}
                     />
                   </ScrollArea>
                 </div>
@@ -307,7 +479,9 @@
                     size="large"
                     color="blue"
                     variant="filled"
-                    icon={<IconCheckFilled />}
+                    disabled={!selectedData?.period_id||!selectedData?.classcode_id||!selectedData?.classroom_id||!selectedData?.person_limit||timeSlotList.length<1||!teacherState.some(t => t.enabled && (t.maxSlot ?? 0) > 0)}
+                    onClick={handlePreview}
+                    icon={<IconEyeCheck />}
                   ></Button>
                   <Button
                     size="large"
@@ -324,16 +498,56 @@
 
             <hr />
             <CardContent>
+              <Typography.Title level={5} className="mb-2">
+                          Mevcut Program{" "}
+                          <span className="text-xs font-normal text-gray-400">
+                            (Yeşil = boş atanabilir • Kırmızı = dolu • Sarı = derslik çakışması)
+                          </span>
+                        </Typography.Title>
               <WeeklySchedulePicker
                 selected={timeSlotList}
                 scheduleListbyClasscode={scheduleListbyClasscode}
                 scheduleListbyClassroom={scheduleListbyClassroom}
                 viewMode
-                //  onChange={handleChangeSlotTable}
+                // onChange={handleChangeSlotTable}
                 // maxSelections={selectedData.max_limit} // girilen max limiti yazacağız.
               />
             </CardContent>
           </Card>
+          {showPreview&&
+          <Modal
+        title={`Assign Preview - ${assignmentRows?.[0]?.classroom_name}`}
+        centered
+        open={showPreview}
+        onOk={handleSave}
+        onCancel={() => setShowPreview(false)}
+        width={1000}
+        mask={{blur:true}}
+      >
+        <div className="my-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
+              {assignmentRows.map((row) => (
+                <div
+                  key={row.teacher_id}
+                  className="flex items-center gap-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2"
+                >
+                  <span className="font-medium text-sm text-emerald-800 dark:text-emerald-300 min-w-32 truncate">
+                    {row.teacher_name}
+                  </span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                    {row.time_slot_ids?.length} slot atandı
+                  </span>
+                </div>
+              ))}
+            </div>
+        <WeeklySchedulePicker
+             //   selected={timeSlotList}
+                viewMode
+                scheduleListbyClasscode={scheduleListbyClasscode}
+                previewSlotList={previewSchedule}
+                //  onChange={handleChangeSlotTable}
+                // maxSelections={selectedData.max_limit} // girilen max limiti yazacağız.
+              />
+      </Modal>}
         </div>
       );
     };

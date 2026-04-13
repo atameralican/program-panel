@@ -79,9 +79,10 @@ const SortableListItem: React.FC<SortableListItemProps> = ({ itemKey, children }
 interface SortableListProps {
   teacherList?: TeacherType[]; // opsiyonel, boş gelebilir
   person_limit?: number; 
+  onTeacherStateChange?: (teachers: TeacherType[]) => void;
 }
 
-const SortableList: React.FC<SortableListProps> = ({ teacherList = [], person_limit }) => {
+const SortableList: React.FC<SortableListProps> = ({ teacherList = [], person_limit,onTeacherStateChange }) => {
   const [teachers, setTeachers] = useState<TeacherType[]>(teacherList);
 
   // teacherList prop'u değiştiğinde (API'den veri geldiğinde) state'i güncelle
@@ -90,15 +91,45 @@ const SortableList: React.FC<SortableListProps> = ({ teacherList = [], person_li
     console.log("teacherList",teacherList)
   }, [teacherList]);
 
- const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!active || !over || active.id === over.id) return;
-    setTeachers((prevState) => {
-      const activeIndex = prevState.findIndex((i) => i.id === active.id);
-      const overIndex = prevState.findIndex((i) => i.id === over.id);
-      return arrayMove(prevState, activeIndex, overIndex);
-    });
-  };
 
+  
+  // Her değişiklik üst sayfaya haber veriyor. 
+  const notify = (updated: TeacherType[]) => {
+    onTeacherStateChange?.(updated);
+  };
+  //sıralama
+   const onDragEnd = ({ active, over }: DragEndEvent) => {
+      if (!active || !over || active.id === over.id) return;
+      setTeachers((prev) => {
+        const activeIndex = prev.findIndex((i) => i.id === active.id);
+        const overIndex = prev.findIndex((i) => i.id === over.id);
+        const newArrayIndex = arrayMove(prev, activeIndex, overIndex);
+        notify(newArrayIndex);//parentı bilgilendir. 
+        return newArrayIndex;
+      });
+    };
+
+    //switch değişimi
+    const handleSwitch = (id: number, enabled: boolean) => {
+      setTeachers((prev) => {
+        const newEnable = prev.map((item) =>
+          item.id === id ? { ...item, enabled } : item,
+        );
+        notify(newEnable);
+        return newEnable;
+      });
+    };
+//maxSlot Değişimi
+    const handleMaxSlot = (id: number, value: number | null) => {
+      setTeachers((prev) => {
+        const newMaxSlot = prev.map((item) =>
+          item.id === id ? { ...item, maxSlot: value ?? 0 } : item,
+        );
+        notify(newMaxSlot);
+        return newMaxSlot;
+      });
+    };
+  
   if (teachers.length === 0) {
     return <p className="text-center text-gray-400">Listelenecek öğretmen bulunamadı.</p>;
   }
@@ -109,26 +140,38 @@ const SortableList: React.FC<SortableListProps> = ({ teacherList = [], person_li
       onDragEnd={onDragEnd}
       id="list-drag-sorting-handler"
     >
-      <SortableContext items={teachers.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext
+        items={teachers.map((item) => item.id)}
+        strategy={verticalListSortingStrategy}
+      >
         <div className="w-full space-y-2">
           {teachers.map((item) => (
             <SortableListItem key={item.id} itemKey={item.id}>
               <DragHandle />
-              <Switch defaultValue={false} />
-              <span className="flex-1">{`${item?.name??"-"} (${item?.lesson_count??"0"})`}</span>
-              <InputNumber
-                className="w-full"
-                min={0}
-                max={person_limit??0}
-                defaultValue={0}
-                //value={teacherPayload?.section_limit}
-                //onChange={(e) =>
-                //  setTeacherPayload((prev) => ({
-                //    ...prev,
-                //    section_limit: e || 23,
-                //  }))
-                //}
+              <Switch
+                checked={item.enabled}
+                onChange={(value) => handleSwitch(item.id, value)}
               />
+              <span className="flex-1 text-sm truncate">
+                {item.name ?? "-"}
+                <span className="ml-1 text-xs text-gray-400">
+                  ({item.lesson_count ?? 0} atanmış)
+                </span>
+              </span>
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-xs text-gray-500 hidden sm:inline">
+                  Maks:
+                </span>
+                <InputNumber
+                  className="w-full"
+                  min={0}
+                  max={person_limit ?? 0}
+                  defaultValue={0}
+                  value={item.maxSlot??0}
+                  disabled={!item.enabled}
+                  onChange={(value) => handleMaxSlot(item.id, value)}
+                />
+              </div>
             </SortableListItem>
           ))}
         </div>

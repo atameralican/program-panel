@@ -283,6 +283,7 @@ function toPreviewSchedule(rows: AssignmentRow[]): ScheduleDataType[] {
         }
       };
       
+
       //Şu an da yapı classcode seçilince servislere gidiyor. yaptığı işlem
       /**OLMASI GEREKEN
        * PERİOD VE CLASSCODE SEÇİLİNCE O CLASSCODEUN O PERİODDAKİ SCHEDULE BİLGİSİNİ GETİR.
@@ -442,7 +443,10 @@ function toPreviewSchedule(rows: AssignmentRow[]): ScheduleDataType[] {
         setShowPreview(true);
       };
 
-
+useEffect(() => {
+  console.log("previewSchedule",previewSchedule)
+  console.log("assignmentRows",assignmentRows)
+}, [previewSchedule]);
 
         const handleSave = async () => {
           if (assignmentRows.length === 0) return;
@@ -465,27 +469,29 @@ function toPreviewSchedule(rows: AssignmentRow[]): ScheduleDataType[] {
               classroom_id: row.classroom_id,
             }))
           );
-      console.log("records",records)
-          // setSaving(true);
-          // try {
-          //   const res = await fetch("/api/schedule/save-bulk", {
-          //     method: "POST",
-          //     headers: { "Content-Type": "application/json" },
-          //     body: JSON.stringify({ records }),
-          //   });  
-      
-          //   if (!res.ok) {
-          //     const err = await res.json().catch(() => ({}));
-          //     throw new Error(err?.message ?? "Sunucu hatası");
-          //   }
-      
-          //   message.success(`${records.length} kayıt başarıyla oluşturuldu.`);
-          //   handleClear();
-          // } catch (err: any) {
-          //   message.error(`Kayıt başarısız: ${err.message}`);
-          // } finally {
-          //   // setSaving(false);
-          // }
+      try {
+    const res = await fetch("/api/schedule/save-bulk", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(records), // ✅ KRİTİK
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Sunucu hatası");
+    }
+
+    message.success(data.message || "Kayıt başarılı!");
+
+    setShowPreview(false);
+    handleClear();
+
+  } catch (err: any) {
+    message.error(`Kayıt başarısız: ${err.message}`);
+  }
         };
       return (
         <div className="flex-row ">

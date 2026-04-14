@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     const body = await req.json(); // direkt array geliyor, destructure etme
     
     const { data, error } = await supabase
-        .from('schedules')
+        .from('schedule')
         .insert(body)       // array'i direkt geçebilirsin
         .select()           // .single() kaldırıldı
     

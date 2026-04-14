@@ -67,42 +67,125 @@
   time_slot_ids: number[];
 }
 
-function buildAssignment(
-  sortedTeachers: TeacherType[],// teacherStates,
-  availableSlots: number[], // timeSlotList – boş slotlar//   timeSlotList,
-  classroomId: number,//   selectedData.classroom_id,
-  classroomName: string//   classroomName
-): AssignmentRow[] {
 
-  const result: AssignmentRow[] = [];
-  let slotCursor = 0;
 
-  for (const teacher of sortedTeachers) {
-    if (!teacher.enabled || teacher.maxSlot <= 0) continue;
-    if (slotCursor >= availableSlots.length) break;
 
-    const assigned: number[] = [];
-    while (
-      assigned.length < teacher.maxSlot &&
-      slotCursor < availableSlots.length
-    ) {
-      assigned.push(availableSlots[slotCursor]);
-      slotCursor++;
-    }
+function groupConsecutiveSlots(slots: number[]): number[][] {
+  if (slots.length === 0) return [];
 
-    if (assigned.length > 0) {
-      result.push({
-        teacher_id: teacher.id,
-        teacher_name: teacher.name,
-        classroom_id: classroomId,
-        classroom_name: classroomName,
-        time_slot_ids: assigned,
-      });
+  const groups: number[][] = [];
+  let currentGroup = [slots[0]];
+
+  for (let i = 1; i < slots.length; i++) {
+    if (slots[i] === slots[i - 1] + 1) {
+      currentGroup.push(slots[i]);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = [slots[i]];
     }
   }
-console.log("result",result)
-  return result;
+
+  groups.push(currentGroup);
+  return groups;
 }
+function buildAssignmentBalanced(
+  teachers: TeacherType[],
+  availableSlots: number[],
+  classroomId: number,
+  classroomName: string
+): AssignmentRow[] {
+console.log("availableSlots",availableSlots)
+  const activeTeachers = teachers
+    .filter(t => t.enabled && t.maxSlot > 0)
+    .map(t => ({
+      ...t,
+      remaining: t.maxSlot,
+      slots: [] as number[],
+    }));
+
+  if (activeTeachers.length === 0) return [];
+
+  const groups = groupConsecutiveSlots(availableSlots);
+
+  let teacherIndex = 0;
+
+  for (const group of groups) {
+
+    let assigned = false;
+
+    // 1️⃣ sıradaki hocadan başlayarak uygun olanı bul
+    for (let i = 0; i < activeTeachers.length; i++) {
+      const idx = (teacherIndex + i) % activeTeachers.length;
+      const teacher = activeTeachers[idx];
+
+      if (teacher.remaining >= group.length) {
+        teacher.slots.push(...group);
+        teacher.remaining -= group.length;
+
+        // ✅ KRİTİK: blok bitince sırayı ilerlet
+        teacherIndex = (idx + 1) % activeTeachers.length;
+
+        assigned = true;
+        break;
+      }
+    }
+
+    // 2️⃣ blok verilemezse fallback (tek tek)
+    if (!assigned) {
+   let lastAssignedTeacherId: number | null = null;
+
+  for (const slot of group) {
+
+    const availableTeachers = activeTeachers.filter(t => t.remaining > 0);
+    if (availableTeachers.length === 0) break;
+
+    let selectedTeacher;
+
+    // 🔥 1. ÖNCE aynı hocayı devam ettir
+    if (lastAssignedTeacherId) {
+      const sameTeacher = availableTeachers.find(
+        t => t.id === lastAssignedTeacherId
+      );
+
+      if (sameTeacher) {
+        selectedTeacher = sameTeacher;
+      }
+    }
+
+    // 🔥 2. yoksa en çok remaining
+    if (!selectedTeacher) {
+      availableTeachers.sort((a, b) => {
+        if (b.remaining !== a.remaining) {
+          return b.remaining - a.remaining;
+        }
+        return (a.lesson_count ?? 0) - (b.lesson_count ?? 0);
+      });
+
+      selectedTeacher = availableTeachers[0];
+    }
+
+    selectedTeacher.slots.push(slot);
+    selectedTeacher.remaining--;
+
+    // ✅ BURASI KRİTİK
+    lastAssignedTeacherId = selectedTeacher.id;
+
+    teacherIndex = activeTeachers.findIndex(t => t.id === selectedTeacher.id);
+  }
+    }
+  }
+
+  return activeTeachers
+    .filter(t => t.slots.length > 0)
+    .map(t => ({
+      teacher_id: t.id,
+      teacher_name: t.name,
+      classroom_id: classroomId,
+      classroom_name: classroomName,
+      time_slot_ids: t.slots,
+    }));
+}
+
 
 /** AssignmentRow[] → WeeklySchedulePicker'ın beklediği ScheduleDataType[] */
 function toPreviewSchedule(rows: AssignmentRow[]): ScheduleDataType[] {
@@ -347,7 +430,7 @@ function toPreviewSchedule(rows: AssignmentRow[]): ScheduleDataType[] {
         const newTimeSlotList = timeSlotList.filter(
           (item) => !scheduleListbyClassroom?.includes(item),
         ); //eğer seçilen classroomda ders varsa o slota eklememesi için.
-        const rows = buildAssignment(
+        const rows = buildAssignmentBalanced  (
           teacherState,
           newTimeSlotList,
           selectedData.classroom_id,

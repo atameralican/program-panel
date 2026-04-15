@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
         .from('classcodes')
         .insert(body)
-        .select('id,full_name')
+        .select('id,name')
         .single()
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })

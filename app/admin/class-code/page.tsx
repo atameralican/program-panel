@@ -21,7 +21,7 @@ import {
 import { useNotify } from "@/components/ui/notify-ant-rev";
 type ClasscodeType = {
   id: number | null;
-  full_name?: string ;
+  name?: string ;
   code: string ;
   module_id: number | null;
 };
@@ -40,7 +40,7 @@ const ClassCodePage = () => {
   const notify = useNotify();
   const [classcodePayload, setClasscodePayload] = useState<ClasscodeType>({
     id: null,
-    full_name: "",
+    name: "",
     code: "",
     module_id: null,
   });
@@ -52,7 +52,7 @@ const ClassCodePage = () => {
   }, []);
 
   const handleClear = () => {
-    setClasscodePayload({ id: null, full_name: "", code: "", module_id: null });
+    setClasscodePayload({ id: null, name: "", code: "", module_id: null });
   };
 
   const moduleMap = React.useMemo(() => {
@@ -93,7 +93,7 @@ const ClassCodePage = () => {
       });
       return;
     }
-    const full_name =
+    const name =
       (await moduleList?.find((m) => m.id === classcodePayload.module_id)
         ?.code) +
       "-" +
@@ -105,7 +105,7 @@ const ClassCodePage = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...classcodePayload, full_name: full_name }),
+      body: JSON.stringify({ ...classcodePayload, name: name }),
     })
       .then((res) => res.json())
       .then((res) => {
@@ -224,8 +224,8 @@ const ClassCodePage = () => {
           <Table<ClasscodeType> dataSource={classCodeList} rowKey="id">
             <Column
               title="Section Name"
-              dataIndex="full_name"
-              key="full_name"
+              dataIndex="name"
+              key="name"
             />
             <Column title="Code" dataIndex="code" key="code" />
             <Column

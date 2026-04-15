@@ -26,7 +26,6 @@
   interface GenericDataType {
     id: number | null;
     name?: string;
-    full_name?: string;
     modules?:any;
   }
   export type TeacherType = {
@@ -52,6 +51,7 @@
     time_slot_id: number ;
     teachers:{id:number,name:string} | null;
     classrooms:{id:number,name:string} | null;
+    classcodes?:{id:number,name:string} | null;
   }
 
   export type TeacherCountType={
@@ -513,7 +513,7 @@ useEffect(() => {
                 <div className="col-span-6 lg:col-span-3">
                   <Typography.Title level={5}>ClassCode</Typography.Title>
                   <Select
-                    fieldNames={{ label: "full_name", value: "id" }}
+                    fieldNames={{ label: "name", value: "id" }}
                     className="w-full"
                     options={classcodeList}
                     value={selectedData?.classcode_id}

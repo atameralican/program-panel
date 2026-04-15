@@ -5,21 +5,21 @@ import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ classroomId: string; periodId: string }> }
+  context: { params: Promise<{ teacherId: string; periodId: string }> }
 ) {
-  const { classroomId, periodId } = await context.params;  
-if (!classroomId||classroomId === "undefined" ||classroomId === "null" ) {
+  const { teacherId, periodId } = await context.params;  
+if (!teacherId||teacherId === "undefined" ||teacherId === "null" ) {
     return NextResponse.json([], { status: 200 });
   }
   const supabase = await createSupabaseServerClient();
 
-  const numericClass = Number(classroomId);
+  const numericClass = Number(teacherId);
   const numericPeriod = Number(periodId);
 
   const { data, error } = await supabase
     .from("schedule")
-    .select("id,time_slot_id,teachers(id,name),classcodes(id,name)")
-    .eq("classroom_id", numericClass)
+    .select("id,time_slot_id,classrooms(id,name),classcodes(id,name)")
+    .eq("teacher_id", numericClass)
     .eq("period_id", numericPeriod);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

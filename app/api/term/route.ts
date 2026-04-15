@@ -6,7 +6,7 @@ export async function GET(req: Request) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
         .from('term')
-        .select(`*`)
+        .select(`id,name`)
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }

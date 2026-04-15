@@ -11,6 +11,7 @@ import {
   IconColumns,           
   IconPresentation,      
   IconInnerShadowTop,
+  IconCalendarWeek,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -73,6 +74,11 @@ const data = {
       title: "Instructor Add",
       url: "/admin/instructor",
       icon: IconPresentation,
+    },
+    {
+      title: "Schedule View",
+      url: "/admin/schedule-view",
+      icon: IconCalendarWeek,
     },
   ],
 }

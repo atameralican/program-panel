@@ -13,7 +13,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Button, InputNumber, Switch } from 'antd';
 import { Card } from '@/components/ui/card';
-import { TeacherType } from '@/app/admin/instructor/page';
+import { TeacherType } from '@/app/admin/instructor/types';
+
 
 interface SortableListItemContextProps {
   setActivatorNodeRef?: (element: HTMLElement | null) => void;
@@ -88,7 +89,6 @@ const SortableList: React.FC<SortableListProps> = ({ teacherList = [], person_li
   // teacherList prop'u değiştiğinde (API'den veri geldiğinde) state'i güncelle
   useEffect(() => {
     setTeachers(teacherList);
-    console.log("teacherList",teacherList)
   }, [teacherList]);
 
 

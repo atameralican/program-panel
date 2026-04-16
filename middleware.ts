@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
     // Zaten oturumu açık biri /login'e gitmeye çalışıyor.
     // Direkt admin paneline yönlendir, login sayfasını gösterme.
     const url = request.nextUrl.clone();
-    url.pathname = "/admin";
+    url.pathname = "/admin/schedule-view";
     return NextResponse.redirect(url);
   }
   // ─────────────────────────────────────────────────────────────

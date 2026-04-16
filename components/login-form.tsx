@@ -27,7 +27,7 @@ export function LoginForm() {
       notify.success({ title: "Giriş başarılı", description: "Yönlendiriliyorsunuz..." });
       // Middleware session cookie'yi okuyabilsin diye hard redirect
       const params = new URLSearchParams(window.location.search);
-      window.location.href = params.get("redirectTo") ?? "/admin";
+      window.location.href = params.get("redirectTo") ?? "/admin/schedule-view";
     }
   }
 

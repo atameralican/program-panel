@@ -40,11 +40,11 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    {
-      title: "Admin",
-      url: "/admin",
-      icon: IconLayoutDashboard,
-    },
+    // {
+    //   title: "Admin",
+    //   url: "/admin",
+    //   icon: IconLayoutDashboard,
+    // },
     {
       title: "Program Add",
       url: "/admin/program",
@@ -94,7 +94,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-               <Link href="/admin">
+               <Link href="/admin/schedule-view">
                 <IconInnerShadowTop className="size-5!" />
                 <span className="text-base font-semibold">HPYS</span>
               </Link>

@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Typography, Select, Segmented } from "antd";
+import { Typography, Select, Segmented, message, Spin } from "antd";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import WeeklySchedulePicker from "@/components/WeeklySchedulePicker";
-import { ScheduleDataType } from "../instructor/page";
+import { ScheduleDataType } from "../instructor/types";
+
 interface DataType {
   term_id: number;
   period_id: number | null;
@@ -30,6 +31,7 @@ const ScheduleViewPage = () => {
     classcodeList: [],
   });
   const [selectedId, setSelectedId] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [selectedData, setSelectedData] = useState<DataType>({
     term_id: 1,
     period_id: null,
@@ -108,16 +110,22 @@ const ScheduleViewPage = () => {
   //eğer selectboxdan birisi seçildiyse servisten preview verilerini getir.
   useEffect(() => {
     if (selectedId && selectedData.period_id && selectedData.term_id) {
-      getSchedulebyClassroom();
+      setLoading(true);
+      getScheduleforSelectType();
     }
   }, [selectedId]);
 
-  const getSchedulebyClassroom = async () => {
+
+ // ======== GET SCHEDULE START ========
+  const getScheduleforSelectType = async () => {
     try {
       const response = await fetch(
         `/api/schedule/${viewType === "Classroom" ? "byClassroom" : viewType === "Teacher" ? "byTeacher" : viewType === "Classcode" ? "byClasscode" : ""}/${selectedId}/${selectedData?.period_id}`,
       );
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Sunucu hatası");
+      }
       if (viewType === "Classroom") {
         const formattedData = data.map((item: ScheduleDataType) => {
           const { classcodes, ...rest } = item;
@@ -139,7 +147,11 @@ const ScheduleViewPage = () => {
       } else {
         setPreviewSchedule(data); //viewType Classcode ise normal gelen zaten classroom ile öğretmen ismi
       }
-    } catch (error) {}
+    } catch (err: any) {
+      message.error(`Kayıt başarısız: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
   // ======== SELECTBOXDAN SEÇİM YAPILINCA  UYGUN SLOTLAR GETİRİLİYOR END ========
 
@@ -178,7 +190,7 @@ const ScheduleViewPage = () => {
         <hr />
         <CardContent>
           <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-12 lg:col-span-6 ">
+            <div className="col-span-12 lg:col-span-4 ">
               <Typography.Title level={5}>View Type</Typography.Title>
               <Segmented<string>
                 options={["Classroom", "Teacher", "Classcode"]}
@@ -187,7 +199,7 @@ const ScheduleViewPage = () => {
                 block
               />
             </div>
-            <div className="col-span-12 lg:col-span-6 ">
+            <div className="col-span-12 lg:col-span-4 ">
               <Typography.Title level={5}>{viewType}</Typography.Title>
               <Select
                 fieldNames={{ label: "name", value: "id" }}
@@ -206,10 +218,12 @@ const ScheduleViewPage = () => {
               />
             </div>
             <div className="col-span-12">
-              <WeeklySchedulePicker
-                viewMode
-                previewSlotList={previewSchedule}
-              />
+              <Spin spinning={loading} >
+                <WeeklySchedulePicker
+                  viewMode
+                  previewSlotList={previewSchedule}
+                />
+              </Spin>
             </div>
           </div>
         </CardContent>

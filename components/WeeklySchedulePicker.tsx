@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { ScheduleDataType } from "@/app/admin/instructor/page";
+import { ScheduleDataType } from "@/app/admin/instructor/types";
+
 
 // ─── Types ----
 

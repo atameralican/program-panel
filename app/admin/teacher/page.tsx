@@ -5,7 +5,6 @@ import {
   Table,
   Button,
   Input,
-  InputNumber,
 } from "antd";
 import {
   IconXFilled,
@@ -44,11 +43,6 @@ const TeacherPage = () => {
   useEffect(() => {
     getTeacherList();
   }, []);
-
-
-
-
-
 
 
   //CLEAR
@@ -205,39 +199,6 @@ const TeacherPage = () => {
                 }}
               />
             </div>
-
-            
-
-            {/* <div className="col-span-6 md:col-span-3 lg:col-span-2 xl:col-span-2">
-              <Typography.Title level={5}>Section Limit</Typography.Title>
-              <InputNumber
-                className="w-full"
-                min={1}
-                max={40}
-                value={teacherPayload?.section_limit}
-                onChange={(e) =>
-                  setTeacherPayload((prev) => ({
-                    ...prev,
-                    section_limit: e || 23,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="col-span-6 md:col-span-3 lg:col-span-2 xl:col-span-2">
-              <Typography.Title level={5}>Max Limit</Typography.Title>
-              <InputNumber
-                className="w-full"
-                min={1}
-                max={40}
-                value={teacherPayload?.max_limit}
-                onChange={(e) =>
-                  setTeacherPayload((prev) => ({ ...prev, max_limit: e || 23 }))
-                }
-              />
-            </div> */}
-
-
 
             <div className="col-span-12 md:col-span-3 content-end lg:col-span-4 xl:col-span-2">
               <CardAction className="flex gap-1.5">

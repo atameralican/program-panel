@@ -3,12 +3,12 @@ import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 
 export async function POST(req: Request) {
     const supabase = await createSupabaseServerClient();
-    const body = await req.json(); // direkt array geliyor, destructure etme
+    const body = await req.json(); // direkt array geliyor, destructure etmee gerek yk
     
     const { data, error } = await supabase
         .from('schedule')
-        .insert(body)       // array'i direkt geçebilirsin
-        .select()           // .single() kaldırıldı
+        .insert(body)      
+        .select()          
     
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })

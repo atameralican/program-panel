@@ -8,6 +8,7 @@ import {
   Select,
   Input,
   InputNumber,
+  message,
 } from "antd";
 import {
   IconXFilled,
@@ -26,7 +27,6 @@ import {
   //CardTitle,
 } from "@/components/ui/card";
 import { ProgramProps } from "../program/page";
-import { useNotify } from "@/components/ui/notify-ant-rev";
 
 type ModuleProps = {
   id: number | null;
@@ -40,7 +40,6 @@ type ModuleProps = {
 
 const ModulePage = () => {
   const { Column } = Table;
-  const notify = useNotify();
   const [programList, setProgramList] = useState<ProgramProps[]>();
   const [moduleList, setModuleList] = useState<ModuleProps[]>([]);
   const [selectedData, setSelectedData] = useState<ModuleProps>({
@@ -75,24 +74,18 @@ const ModulePage = () => {
   const handleSave = () => {
     //validasyonlar
     if (selectedData.name.trim() === "") {
-      notify.error({
-        title: "Fail",
-        description: "Modül adı boş bırakılamaz!",
-      });
+      message.error("Modül adı boş bırakılamaz!",
+      );
       return;
     }
     if (selectedData.code.trim() === "") {
-      notify.error({
-        title: "Fail",
-        description: "Modül kodu boş bırakılamaz!",
-      });
+      message.error("Modül kodu boş bırakılamaz!",
+      );
       return;
     }
     if (selectedData.program_id === null) {
-      notify.error({
-        title: "Fail",
-        description: "Program seçilmedi!",
-      });
+      message.error("Program seçilmedi!",
+      );
       return;
     }
     //Save Action
@@ -106,23 +99,17 @@ const ModulePage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error( res.error,
+          );
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Saved!",
-        });
+        message.success( res.message || "Saved!",
+        );
         getModuleList();
         handleClear();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error(err.message ?? err,
+        );
       });
   };
 
@@ -137,22 +124,16 @@ const ModulePage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error(res.error,
+          );
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Deleted!",
-        });
+        message.success( res.message || "Deleted!",
+        );
         getModuleList();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error(err.message ?? err,
+        );
       });
   };
   ////// CRUD END /////

@@ -5,14 +5,15 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
-import { useNotify } from "./ui/notify-ant-rev";
+import { message } from "antd";
+
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const supabase = getSupabaseBrowserClient();
-  const notify = useNotify();
+
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,10 +22,10 @@ export function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      notify.error({ title: "Giriş başarısız", description: error.message });
+      message.error( error.message );
       setLoading(false);
     } else {
-      notify.success({ title: "Giriş başarılı", description: "Yönlendiriliyorsunuz..." });
+      message.success( "Yönlendiriliyorsunuz..." );
       // Middleware session cookie'yi okuyabilsin diye hard redirect
       const params = new URLSearchParams(window.location.search);
       window.location.href = params.get("redirectTo") ?? "/admin/schedule-view";

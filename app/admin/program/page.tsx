@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Typography, Button, Input, InputNumber } from "antd";
+import { Typography, Button, Input, InputNumber, message } from "antd";
 import { IconXFilled, IconCheckFilled } from "@tabler/icons-react";
 import {
   Card,
@@ -10,7 +10,6 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import WeeklySchedulePicker from "@/components/WeeklySchedulePicker";
-import { useNotify } from "@/components/ui/notify-ant-rev";
 
 export type ProgramProps = {
   name: string;
@@ -18,7 +17,6 @@ export type ProgramProps = {
   timeSlots: number[];
 };
 const ProgramPage = () => {
-  const notify = useNotify();
   const [selectedData, setSelectedData] = useState<ProgramProps>({
     name: "",
     max_limit: 23,
@@ -37,31 +35,23 @@ const ProgramPage = () => {
   const handleSubmit = async () => {
     //validasyonlar
     if (selectedData.timeSlots.length > selectedData.max_limit) {
-      notify.error({
-        title: "Fail",
-        description: `Seçilen saat sayısı, belirlenen maksimum limiti aşıyor! Lütfen en fazla ${selectedData.max_limit} saat seçin.`,
-      });
+      message.error(`Seçilen saat sayısı, belirlenen maksimum limiti aşıyor! Lütfen en fazla ${selectedData.max_limit} saat seçin.`,
+      );
       return;
     }
     if (selectedData.timeSlots.length === 0) {
-      notify.error({
-        title: "Fail",
-        description: `Lütfen en az bir saat seçin!`,
-      });
+      message.error(`Lütfen en az bir saat seçin!`,
+      );
       return;
     }
     if (!selectedData.name.trim() ) {
-      notify.error({
-        title: "Fail",
-        description: `Lütfen program adnı girin!`,
-      });
+      message.error(`Lütfen program adnı girin!`,
+      );
       return;
     }
     if (selectedData.max_limit < 1 || selectedData.max_limit > 40) {
-      notify.error({
-        title: "Fail",
-        description: `Lütfen 1 ile 40 arasında bir limit girin!`,
-      });
+      message.error(`Lütfen 1 ile 40 arasında bir limit girin!`,
+      );
       return;
     }
     //backende gönderme
@@ -76,25 +66,19 @@ const ProgramPage = () => {
 
       if (!response.ok) {
         //hata varsa
-        notify.error({
-          title: "Kayıt Başarısız",
-          description: result.error || "Beklenmedik bir hata oluştu.",
-        });
+        message.error(result.error || "Beklenmedik bir hata oluştu.",
+        );
       } else {
-        notify.success({
-          title: "Başarılı",
-          description: result.message || "Program başarıyla kaydedildi!",
-        });
+        message.success(result.message || "Program başarıyla kaydedildi!",
+        );
 
         clearForm();
       }
     } catch (error) {
       // Sunucuya erişememe durumu için.
-      notify.error({
-        title: "Bağlantı Hatası",
-        description:
+      message.error(
           "Sunucuya ulaşılamıyor. Lütfen internetinizi kontrol edin.",
-      });
+      );
     }
   };
   return (

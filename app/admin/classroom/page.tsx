@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 
-import { Typography, Table, Button, Input, Select, Modal } from "antd";
+import { Typography, Table, Button, Input, Select, Modal, message } from "antd";
 import {
   IconXFilled,
   IconCheckFilled,
@@ -11,8 +11,6 @@ import {
   IconPencilCheck,
 } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useNotify } from "@/components/ui/notify-ant-rev";
-import { DeleteDataType } from "@/lib/types";
 interface ClassroomDataType {
   id: number | null;
   name: string;
@@ -29,7 +27,6 @@ const ClassRoomPage = () => {
     info: "",
   });
   const { Column } = Table;
-  const notify = useNotify();
 
   useEffect(() => {
     getClassroomList();
@@ -58,10 +55,8 @@ const ClassRoomPage = () => {
   const handleSave = () => {
     //validasyonlar
     if (classroomPayload.name.trim() === "") {
-      notify.error({
-        title: "Fail",
-        description: "Classroom Adı Boş Olamaz!",
-      });
+      message.error("Classroom Adı Boş Olamaz!",
+   );
       return;
     }
 
@@ -76,23 +71,17 @@ const ClassRoomPage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error(res.error,
+          );
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Saved!",
-        });
+        message.success(res.message || "Saved!",
+        );
         getClassroomList();
         handleClear();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error(err.message ?? err,
+        );
       });
   };
   //DELETE
@@ -107,22 +96,16 @@ const ClassRoomPage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error( res.error,
+          );
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Deleted!",
-        });
+        message.success( res.message || "Deleted!",
+        );
         getClassroomList();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error(err.message ?? err,
+        );
       });
   };
   return (

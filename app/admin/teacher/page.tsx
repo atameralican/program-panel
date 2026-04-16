@@ -5,6 +5,7 @@ import {
   Table,
   Button,
   Input,
+  message,
 } from "antd";
 import {
   IconXFilled,
@@ -19,7 +20,6 @@ import {
   CardContent,
   CardHeader,
 } from "@/components/ui/card";
-import { useNotify } from "@/components/ui/notify-ant-rev";
 interface TeacherDataType {
   id: number | null;
   name: string;
@@ -38,7 +38,6 @@ const TeacherPage = () => {
     room_tel: "",
   });
   const { Column } = Table;
-  const notify = useNotify();
 
   useEffect(() => {
     getTeacherList();
@@ -70,10 +69,8 @@ const TeacherPage = () => {
   const handleSave = () => {
     //validasyonlar
     if (teacherPayload.name.trim() === "") {
-      notify.error({
-        title: "Fail",
-        description: "Teacher Name cannot be empty!",
-      });
+      message.error("Teacher Name cannot be empty!",
+      );
       return;
     }
 
@@ -89,23 +86,17 @@ const TeacherPage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error(res.error,
+          );
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Saved!",
-        });
+        message.success(res.message || "Saved!",
+        );
         getTeacherList();
         handleClear();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error( err.message ?? err,
+        );
       });
   };
   //DELETE
@@ -120,22 +111,16 @@ const TeacherPage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error( res.error,
+          );
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Deleted!",
-        });
+        message.success( res.message || "Deleted!",
+        );
         getTeacherList();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error( err.message ?? err,
+        );
       });
   };
 

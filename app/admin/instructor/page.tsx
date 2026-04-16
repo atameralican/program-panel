@@ -79,8 +79,8 @@ const InstructorPage = () => {
     }));
     setTeacherList(updatedList);
 
-  } catch (error) {
-    console.error("Veri çekme hatası:", error);
+  } catch (error:any) {
+    message.error("Veri çekme hatası:", error);
   } finally {
     setLoading(false); // Her durumda çalışır
   }
@@ -131,8 +131,8 @@ const InstructorPage = () => {
           }),
         );
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error:any) {
+      message.error(error);
     }
   };
   /////// ------- PERIOD CHANGE END ------- ///////
@@ -172,8 +172,8 @@ const InstructorPage = () => {
 
       // Artık state'e bağlı değil, direkt veriyi geçiyoruz
       controleClasscode(timeSlotIds, dataSchedulebyClasscode);
-    } catch (error) {
-      console.error("Veri çekilirken hata oluştu:", error);
+    } catch (error:any) {
+      message.error("Veri çekilirken hata oluştu:", error);
     } finally{setScheduleLoading(false)}
   };
 
@@ -215,8 +215,8 @@ const InstructorPage = () => {
         ...new Set(data?.map((item) => item.time_slot_id)),
       ];
       setScheduleListbyClassroom(usedTimeSlotIds);
-    } catch (error) {
-      console.error("Veri çekilirken hata oluştu:", error);
+    } catch (error:any) {
+      message.error("Veri çekilirken hata oluştu:", error);
     } finally{setScheduleLoading(false)}
   };
   /////// ------- CLASSROOM CHANGE END ------- ///////

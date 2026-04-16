@@ -1,4 +1,5 @@
 import {createServerClient} from "@supabase/ssr"
+import { message } from "antd";
 import {  cookies } from "next/headers";
 
 function getEnvironmentVariables(){
@@ -28,8 +29,8 @@ cookies:{
             cookiesToSet.forEach(({name,value,options})=>
             cookieStore?.set(name,value,options)
         );
-        } catch(error){
-            console.error(error)
+        } catch(error:any){
+            message.error(error)
         }
     }
 }

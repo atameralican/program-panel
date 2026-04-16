@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Typography, Table, Button, Select, Input, InputNumber } from "antd";
+import { Typography, Table, Button, Select, Input, InputNumber, message } from "antd";
 import {
   IconXFilled,
   IconCheckFilled,
@@ -18,7 +18,6 @@ import {
   CardHeader,
   //CardTitle,
 } from "@/components/ui/card";
-import { useNotify } from "@/components/ui/notify-ant-rev";
 type ClasscodeType = {
   id: number | null;
   name?: string ;
@@ -37,7 +36,6 @@ type ModuleType={
 
 const ClassCodePage = () => {
   const { Column } = Table;
-  const notify = useNotify();
   const [classcodePayload, setClasscodePayload] = useState<ClasscodeType>({
     id: null,
     name: "",
@@ -79,18 +77,12 @@ const ClassCodePage = () => {
   //SAVE AND UPDATE
   const handleSave = async () => {
     if (classcodePayload.code.trim() === "") {
-      notify.error({
-        title: "Fail",
-        description: "The class code cannot be empty!",
-      });
+      message.error("The class code cannot be empty!");
       return;
     }
 
     if (classcodePayload.module_id === null) {
-      notify.error({
-        title: "Fail",
-        description: "The module cannot be empty!",
-      });
+      message.error("The module cannot be empty!");
       return;
     }
     const name =
@@ -110,23 +102,14 @@ const ClassCodePage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error(res.error);
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Saved!",
-        });
+        message.success( res.message || "Saved!");
         getClasscodeList();
         handleClear();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error( err.message ?? err);
       });
   };
 
@@ -142,22 +125,13 @@ const ClassCodePage = () => {
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
-          return notify.error({
-            title: "Fail",
-            description: res.error,
-          });
+          return message.error(res.error);
         }
-        notify.success({
-          title: "Success",
-          description: res.message || "Deleted!",
-        });
+        message.success( res.message || "Deleted!");
         getClasscodeList();
       })
       .catch((err) => {
-        return notify.error({
-          title: "Fail",
-          description: err.message ?? err,
-        });
+        return message.error(err.message ?? err);
       });
   };
 
